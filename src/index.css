@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-accent-orange: #F46C38;
+  --color-accent-lime: #C5FF41;
+  --color-accent-red: #FF2600;
+  --color-bg-dark: #151312;
+  --color-card-light: #F5F5F5;
+
+  --font-poppins: "Poppins", sans-serif;
+  --font-satoshi: "Satoshi", sans-serif;
+  --font-inter: "Inter", sans-serif;
+}
+
+:root {
+  background-color: #151312;
+  color: white;
+  font-family: var(--font-inter);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-poppins);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #151312;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #F46C38;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF2600;
+}
+
+.dashed-line {
+  background-image: linear-gradient(to right, #F46C38 50%, transparent 50%);
+  background-size: 10px 1px;
+  background-repeat: repeat-x;
+}
+
+.dashed-line-v {
+  background-image: linear-gradient(to bottom, #F46C38 50%, transparent 50%);
+  background-size: 1px 10px;
+  background-repeat: repeat-y;
+}
