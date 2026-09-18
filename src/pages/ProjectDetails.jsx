@@ -2,10 +2,13 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ExternalLink, Github } from 'lucide-react';
 import { resumeData } from '../data';
+import { usePortfolio } from '../context/PortfolioContext';
 
 const ProjectDetails = () => {
     const { id } = useParams();
-    const project = resumeData.projects.find(p => p.id === id);
+    const { projects } = usePortfolio();
+    const projectList = projects && projects.length > 0 ? projects : resumeData.projects;
+    const project = projectList.find(p => p.id === id || p._id === id);
 
     if (!project) {
         return (
@@ -20,7 +23,7 @@ const ProjectDetails = () => {
 
     return (
         <div className="min-h-screen bg-bg-dark text-white font-inter selection:bg-accent-orange selection:text-white">
-            <div className="max-w-4xl mx-auto px-6 py-20 lg:py-32">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-20 lg:py-32">
 
                 {/* Back Button */}
                 <motion.div
@@ -30,7 +33,7 @@ const ProjectDetails = () => {
                 >
                     <Link
                         to="/"
-                        className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors uppercase tracking-widest text-sm font-bold mb-12"
+                        className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors uppercase tracking-widest text-xs sm:text-sm font-bold mb-6 sm:mb-12"
                     >
                         <ArrowLeft size={16} />
                         Back to Home
@@ -43,7 +46,7 @@ const ProjectDetails = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.1 }}
                 >
-                    <div className="aspect-video w-full rounded-3xl overflow-hidden mb-12 bg-white/5 border border-white/10">
+                    <div className="aspect-video w-full rounded-2xl sm:rounded-3xl overflow-hidden mb-6 sm:mb-12 bg-white/5 border border-white/10">
                         <img
                             src={project.image}
                             alt={project.title}
@@ -51,15 +54,15 @@ const ProjectDetails = () => {
                         />
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6">
+                    <h1 className="text-2xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-4 sm:mb-6">
                         {project.title}
                     </h1>
 
-                    <div className="flex flex-wrap gap-3 mb-12">
+                    <div className="flex flex-wrap gap-2 sm:gap-3 mb-8 sm:mb-12">
                         {project.tech.map((tech, i) => (
                             <span
                                 key={i}
-                                className="text-sm font-bold uppercase tracking-widest px-4 py-2 rounded-full bg-white/5 border border-white/10 text-accent-orange"
+                                className="text-[10px] sm:text-xs md:text-sm font-bold uppercase tracking-widest px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/5 border border-white/10 text-accent-orange"
                             >
                                 {tech}
                             </span>
@@ -67,7 +70,7 @@ const ProjectDetails = () => {
                     </div>
 
                     <div className="prose prose-invert prose-lg max-w-none">
-                        <p className="text-white/70 leading-relaxed text-xl mb-8">
+                        <p className="text-white/70 leading-relaxed text-lg md:text-xl mb-8">
                             {project.description}
                         </p>
 

@@ -1,7 +1,8 @@
-import { motion, useInView } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Github, Linkedin, Mail, Phone } from 'lucide-react';
 import { resumeData } from '../data';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import { usePortfolio } from '../context/PortfolioContext';
 
 /* ─────────────────────────────────────────
    Infinite horizontal marquee — behind the card
@@ -27,7 +28,7 @@ const InfiniteMarquee = () => {
                     {[...slots, ...slots].map((t, i) => (
                         <span
                             key={i}
-                            className="text-[14vw] font-black tracking-tighter leading-none inline-flex items-center"
+                            className="text-[18vw] sm:text-[14vw] font-black tracking-tighter leading-none inline-flex items-center"
                             style={{
                                 color: 'rgba(255,255,255,0.04)',
                                 WebkitTextStroke: '1px rgba(255,255,255,0.01)'
@@ -40,62 +41,6 @@ const InfiniteMarquee = () => {
                 </motion.div>
             </div>
         </div>
-    );
-};
-
-
-
-/* ─────────────────────────────────────────
-   Count-up hook
-───────────────────────────────────────── */
-const useCountUp = (target, duration = 1400, started = false) => {
-    const [count, setCount] = useState(0);
-    useEffect(() => {
-        if (!started || typeof target !== 'number') { setCount(target ?? 0); return; }
-        let startTime = null;
-        const step = (ts) => {
-            if (!startTime) startTime = ts;
-            const progress = Math.min((ts - startTime) / duration, 1);
-            const eased = 1 - (1 - progress) * (1 - progress);
-            setCount(Math.floor(eased * target));
-            if (progress < 1) requestAnimationFrame(step);
-        };
-        requestAnimationFrame(step);
-    }, [target, duration, started]);
-    return count;
-};
-
-/* ─────────────────────────────────────────
-   Stat Item
-───────────────────────────────────────── */
-const StatItem = ({ numericValue, suffix, label, color, started }) => {
-    const count = useCountUp(numericValue ?? 0, 1400, started);
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center gap-1 group"
-        >
-            <div className="flex items-end gap-0.5 leading-none">
-                {numericValue !== null ? (
-                    <>
-                        <span className="text-5xl md:text-7xl font-black tabular-nums leading-none" style={{ color }}>
-                            {count}
-                        </span>
-                        <span className="text-4xl md:text-5xl font-black mb-1" style={{ color }}>
-                            {suffix}
-                        </span>
-                    </>
-                ) : (
-                    <span className="text-6xl md:text-7xl font-black leading-none" style={{ color }}>
-                        {suffix}
-                    </span>
-                )}
-            </div>
-            <span className="text-base md:text-lg font-bold uppercase tracking-[0.2em] text-white/40 group-hover:text-white/70 transition-colors">
-                {label}
-            </span>
-        </motion.div>
     );
 };
 
@@ -135,6 +80,8 @@ const DashedArc = ({ hovered }) => (
  ───────────────────────────────────────── */
 export const HeroCard = ({ className = "" }) => {
     const [imageHovered, setImageHovered] = useState(false);
+    const { profile } = usePortfolio();
+    const data = profile || resumeData;
 
     return (
         <motion.div
@@ -145,19 +92,19 @@ export const HeroCard = ({ className = "" }) => {
         >
 
             {/* The Card Background & Container */}
-            <div className="bg-[#F0EFED] rounded-[2.5rem] w-full flex flex-col items-center text-[#151312] shadow-2xl relative overflow-hidden transition-all duration-300">
+            <div className="bg-[#F0EFED] rounded-3xl sm:rounded-[2.5rem] w-full flex flex-col items-center text-[#151312] shadow-2xl relative overflow-hidden transition-all duration-300">
 
                 {/* Inner Content — Fluid & Scalable-Ready */}
                 <div
-                    className="w-full h-full flex flex-col items-center justify-between py-8 px-5 sm:py-10 sm:px-8"
+                    className="w-full h-full flex flex-col items-center justify-between py-6 px-4 sm:py-9 sm:px-8"
                 >
 
                     {/* Image with dashed arc */}
                     <div
                         className="relative shrink-0 mb-1 flex items-center justify-center cursor-pointer group transition-all duration-500"
                         style={{
-                            width: 'clamp(180px, var(--card-image-size, 280px), 65vw)',
-                            height: 'clamp(180px, var(--card-image-size, 280px), 65vw)'
+                            width: 'clamp(140px, var(--card-image-size, 220px), 55vw)',
+                            height: 'clamp(140px, var(--card-image-size, 220px), 55vw)'
                         }}
                         onMouseEnter={() => setImageHovered(true)}
                         onMouseLeave={() => setImageHovered(false)}
@@ -180,11 +127,11 @@ export const HeroCard = ({ className = "" }) => {
 
 
                         <div
-                            className="relative z-10 w-[78%] h-[78%] rounded-full overflow-hidden border-[8px] border-white shadow-xl transition-all duration-500"
+                            className="relative z-10 w-[78%] h-[78%] rounded-full overflow-hidden border-[6px] sm:border-[8px] border-white shadow-xl transition-all duration-500"
                         >
                             <img
-                                src="/images/photo3.jpeg"
-                                alt={resumeData.name}
+                                src={data.profileImage || "/images/photo3.jpeg"}
+                                alt={data.name}
                                 className="w-full h-full object-cover object-top"
                             />
                         </div>
@@ -192,42 +139,42 @@ export const HeroCard = ({ className = "" }) => {
 
 
                     {/* Available for work pill */}
-                    <div className="flex flex-col items-center gap-4 w-full">
-                        <span className="inline-flex items-center gap-1.5 px-4 py-1 rounded-full bg-[#F46C38] text-white text-[11px] font-bold uppercase tracking-wider">
+                    <div className="flex flex-col items-center gap-3 sm:gap-4 w-full my-2 sm:my-0">
+                        <span className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1 rounded-full bg-[#F46C38] text-white text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
                             <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
                             Available for work
                         </span>
 
                         <div className="text-center w-full">
-                            <h2 className="text-2xl md:text-5xl font-black mb-2 tracking-tight leading-tight">
-                                {resumeData.name}
+                            <h2 className="text-2xl sm:text-4xl md:text-5xl font-black mb-1 sm:mb-2 tracking-tight leading-tight">
+                                {data.name}
                             </h2>
-                            <p className="text-[#151312]/60 font-medium text-[14px] md:text-[16px] leading-relaxed mx-auto max-w-[320px]">
-                                Full Stack Developer building AI-integrated web applications.
+                            <p className="text-[#151312]/60 font-medium text-xs sm:text-[14px] md:text-[16px] leading-relaxed mx-auto max-w-[280px] sm:max-w-[320px]">
+                                {data.title || "Full Stack Developer building AI-integrated web applications."}
                             </p>
                         </div>
 
                     </div>
 
                     {/* Footer part: Divider + Socials */}
-                    <div className="w-full flex flex-col items-center gap-6">
+                    <div className="w-full flex flex-col items-center gap-4 sm:gap-6 mt-2 sm:mt-0">
                         <div className="w-full h-px bg-[#151312]/10" />
 
-                        <div className="flex flex-wrap justify-center items-center gap-3">
-                            <a href={resumeData.linkedin} target="_blank" rel="noreferrer" title="LinkedIn"
-                                className="w-11 h-11 flex items-center justify-center rounded-2xl bg-white shadow-sm hover:bg-[#F46C38] hover:text-white text-[#151312] transition-all duration-300">
-                                <Linkedin size={20} />
+                        <div className="flex flex-wrap justify-center items-center gap-2.5 sm:gap-3 w-full">
+                            <a href={data.linkedin} target="_blank" rel="noreferrer" title="LinkedIn"
+                                className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white shadow-sm hover:bg-[#F46C38] hover:text-white text-[#151312] transition-all duration-300">
+                                <Linkedin className="w-4 h-4 sm:w-5 sm:h-5" />
                             </a>
-                            <a href={resumeData.github} target="_blank" rel="noreferrer" title="GitHub"
-                                className="w-11 h-11 flex items-center justify-center rounded-2xl bg-white shadow-sm hover:bg-[#F46C38] hover:text-white text-[#151312] transition-all duration-300">
-                                <Github size={20} />
+                            <a href={data.github} target="_blank" rel="noreferrer" title="GitHub"
+                                className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white shadow-sm hover:bg-[#F46C38] hover:text-white text-[#151312] transition-all duration-300">
+                                <Github className="w-4 h-4 sm:w-5 sm:h-5" />
                             </a>
-                            <a href={`mailto:${resumeData.email}`} title="Email"
-                                className="w-11 h-11 flex items-center justify-center rounded-2xl bg-white shadow-sm hover:bg-[#F46C38] hover:text-white text-[#151312] transition-all duration-300">
-                                <Mail size={20} />
+                            <a href={`mailto:${data.email}`} title="Email"
+                                className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white shadow-sm hover:bg-[#F46C38] hover:text-white text-[#151312] transition-all duration-300">
+                                <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
                             </a>
-                            <a href={`mailto:${resumeData.email}`}
-                                className="px-6 py-3 bg-[#151312] text-white rounded-2xl text-sm font-bold hover:bg-[#F46C38] transition-all duration-300">
+                            <a href={`mailto:${data.email}`}
+                                className="px-5 py-2.5 sm:px-6 sm:py-3 bg-[#151312] text-white rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold hover:bg-[#F46C38] transition-all duration-300 whitespace-nowrap">
                                 Let's Talk
                             </a>
                         </div>
@@ -249,43 +196,21 @@ export const HeroCard = ({ className = "" }) => {
 };
 
 
-const Hero = ({ cardVisible = true, showStats = true }) => {
-    const statsRef = useRef(null);
-    const isInView = useInView(statsRef, { once: true, margin: '-50px' });
-
+const Hero = ({ cardVisible = true }) => {
     return (
         <section
             id="home"
-            className="min-h-screen relative overflow-hidden flex flex-col items-center justify-center pt-24 pb-10"
+            className="min-h-screen relative overflow-hidden flex flex-col items-center justify-center pt-20 sm:pt-24 pb-8 sm:pb-10"
         >
             {/* ── Infinite marquee BEHIND the card (z-0) ── */}
             <InfiniteMarquee />
 
             {/* ── Hero Card ── */}
-            <div className={`w-full flex justify-center min-h-[550px] md:h-[650px] ${cardVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                <div className="w-full px-4 xl:px-0 max-w-[700px]">
+            <div className={`w-full flex justify-center min-h-[480px] sm:min-h-[550px] md:h-[650px] ${cardVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                <div className="w-full px-2 sm:px-4 xl:px-0 max-w-[700px]">
                     <HeroCard />
                 </div>
             </div>
-
-            {/* Stats section */}
-            {showStats && (
-                <motion.div
-                    ref={statsRef}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5, duration: 0.5 }}
-                    className="mt-12 z-10 w-full max-w-4xl px-6"
-                >
-                    <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-12" />
-                    <div className="flex flex-wrap justify-center gap-12 md:gap-24">
-                        <StatItem numericValue={2} suffix="+" label="Internships" color="#F46C38" started={isInView} />
-                        <StatItem numericValue={5} suffix="+" label="Projects" color="#C5FF41" started={isInView} />
-                        <StatItem numericValue={null} suffix="AI" label="Specialist" color="#FF2600" started={isInView} />
-                    </div>
-                    <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mt-12" />
-                </motion.div>
-            )}
         </section>
     );
 };
