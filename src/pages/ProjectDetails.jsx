@@ -69,31 +69,59 @@ const ProjectDetails = () => {
                         ))}
                     </div>
 
-                    <div className="prose prose-invert prose-lg max-w-none">
-                        <p className="text-white/70 leading-relaxed text-lg md:text-xl mb-8">
+                    <div className="prose prose-invert prose-lg max-w-none space-y-6">
+                        <p className="text-white/80 leading-relaxed text-lg md:text-xl font-medium">
                             {project.description}
                         </p>
 
-                        <p className="text-white/50 leading-relaxed">
-                            (This is where you can add a detailed case study, problems faced, solutions engineered, and what you learned while building this specific project. It gives depth to your portfolio.)
-                        </p>
+                        {project.detailedInfo && (
+                            <div className="text-white/70 leading-relaxed text-base sm:text-lg whitespace-pre-line pt-4 border-t border-white/10">
+                                {project.detailedInfo}
+                            </div>
+                        )}
+
+                        {project.features && project.features.length > 0 && (
+                            <div className="mt-8 pt-8 border-t border-white/10">
+                                <h3 className="text-lg sm:text-xl font-bold text-white mb-4">
+                                    Key Features & Highlights
+                                </h3>
+                                <ul className="space-y-2.5">
+                                    {project.features.map((feat, i) => (
+                                        <li key={i} className="flex items-start gap-3 text-white/70 text-sm sm:text-base">
+                                            <span className="text-accent-orange font-bold mt-1 select-none">•</span>
+                                            <span>{feat}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="mt-16 pt-12 border-t border-white/10 flex flex-wrap gap-4">
-                        <a
-                            href="#"
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-accent-orange text-white rounded-full font-bold uppercase tracking-widest hover:bg-accent-red transition-all duration-300"
-                        >
-                            Live Demo <ExternalLink size={18} />
-                        </a>
-                        <a
-                            href="#"
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-white/5 text-white rounded-full font-bold uppercase tracking-widest hover:bg-white/10 border border-white/10 transition-all duration-300"
-                        >
-                            Source Code <Github size={18} />
-                        </a>
-                    </div>
+                    {(project.liveUrl || project.githubUrl) && (
+                        <div className="mt-14 pt-10 border-t border-white/10 flex flex-wrap gap-4">
+                            {project.liveUrl && (
+                                <a
+                                    href={project.liveUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-8 py-4 bg-accent-orange text-white rounded-full font-bold uppercase tracking-widest hover:bg-accent-red transition-all duration-300"
+                                >
+                                    Live Demo <ExternalLink size={18} />
+                                </a>
+                            )}
+                            {project.githubUrl && (
+                                <a
+                                    href={project.githubUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-8 py-4 bg-white/5 text-white rounded-full font-bold uppercase tracking-widest hover:bg-white/10 border border-white/10 transition-all duration-300"
+                                >
+                                    Source Code <Github size={18} />
+                                </a>
+                            )}
+                        </div>
+                    )}
                 </motion.div>
             </div>
 

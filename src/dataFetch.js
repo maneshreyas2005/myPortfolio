@@ -213,15 +213,16 @@ export const deleteSkillApi = async (id, token) => {
   return data;
 };
 
-// Experience CRUD
+// Experience CRUD (supports FormData for optional image uploads or JSON)
 export const addExperienceApi = async (expData, token) => {
+  const isFormData = expData instanceof FormData;
+  const headers = { Authorization: `Bearer ${token}` };
+  if (!isFormData) headers['Content-Type'] = 'application/json';
+
   const res = await fetch(`${API_BASE}/experience`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify(expData)
+    headers,
+    body: isFormData ? expData : JSON.stringify(expData)
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed to add experience');
@@ -229,13 +230,14 @@ export const addExperienceApi = async (expData, token) => {
 };
 
 export const updateExperienceApi = async (id, expData, token) => {
+  const isFormData = expData instanceof FormData;
+  const headers = { Authorization: `Bearer ${token}` };
+  if (!isFormData) headers['Content-Type'] = 'application/json';
+
   const res = await fetch(`${API_BASE}/experience/${id}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify(expData)
+    headers,
+    body: isFormData ? expData : JSON.stringify(expData)
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed to update experience');

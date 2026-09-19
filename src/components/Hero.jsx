@@ -96,7 +96,7 @@ export const HeroCard = ({ className = "" }) => {
 
                 {/* Inner Content — Fluid & Scalable-Ready */}
                 <div
-                    className="w-full h-full flex flex-col items-center justify-between py-6 px-4 sm:py-9 sm:px-8"
+                    className="w-full h-full flex flex-col items-center justify-between py-6 px-4 sm:py-8 sm:px-6"
                 >
 
                     {/* Image with dashed arc */}

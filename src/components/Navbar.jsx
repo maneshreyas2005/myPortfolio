@@ -6,7 +6,7 @@ const Navbar = () => {
         { icon: <Home className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Home', href: '#home' },
         { icon: <Code className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Skills', href: '#skills' },
         { icon: <Briefcase className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Work', href: '#projects' },
-        { icon: <Users className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Community', href: '#community' },
+        { icon: <Users className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Responsibilities', href: '#community' },
         { icon: <GraduationCap className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Education', href: '#education' },
     ];
 

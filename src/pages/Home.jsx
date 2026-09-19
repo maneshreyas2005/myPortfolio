@@ -38,21 +38,32 @@ function Home() {
         if (isMobile || !cardRef.current) return;
 
         const ctx = gsap.context(() => {
+            const calculateLayout = () => {
+                const w = window.innerWidth;
+                const targetWidth = Math.min(360, Math.max(300, w * 0.22));
+                // Ensure left edge is at least 32px or 2.5vw from viewport left
+                const targetLeft = Math.max(32, w * 0.025);
+                const targetCenter = targetLeft + targetWidth / 2;
+                const initialCenter = w / 2;
+                const targetX = targetCenter - initialCenter;
+                return { targetWidth, targetX };
+            };
+
             gsap.fromTo(
                 cardRef.current,
                 {
-                    x: '0vw',
+                    x: 0,
                     y: 40,
-                    width: 700,
+                    width: Math.min(700, window.innerWidth * 0.9),
                     height: 650,
                     opacity: 1,
                     '--card-image-size': '280px',
                     immediateRender: true
                 },
                 {
-                    x: '-36vw',
+                    x: () => calculateLayout().targetX,
                     y: 0,
-                    width: '23vw',
+                    width: () => calculateLayout().targetWidth,
                     height: '80vh',
                     opacity: 1,
                     ease: 'power2.inOut',
@@ -99,8 +110,8 @@ function Home() {
 
                     <div className="w-full xl:w-3/4 pb-20 px-4 sm:px-6 md:px-12 xl:px-20">
                         <Skills />
-                        <Projects />
                         <Experience />
+                        <Projects />
                         <Community />
                         <Education />
                         <Footer />

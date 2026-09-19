@@ -15,6 +15,10 @@ const communitySchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  imagePublicId: {
+    type: String,
+    default: null
+  },
   tag: {
     type: String,
     default: 'Community'

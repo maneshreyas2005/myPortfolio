@@ -14,32 +14,32 @@ export default function Community() {
     <section id="community" className="py-24 relative overflow-hidden bg-[#151312]">
       {/* Subtle background ambient text */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full text-center pointer-events-none select-none overflow-hidden h-fit">
-        <h2 className="text-[20vw] sm:text-[14vw] md:text-[18vw] font-black text-white/[0.02] leading-none uppercase tracking-tighter">
-          Impact
+        <h2 className="text-[16vw] sm:text-[11vw] md:text-[13vw] font-black text-white/[0.02] leading-none uppercase tracking-tighter">
+          Leadership
         </h2>
       </div>
 
       <div className="max-w-6xl mx-auto px-0 sm:px-4 relative z-10">
-        {/* Section Header matching the screenshot */}
+        {/* Section Header */}
         <div className="mb-10 sm:mb-16">
           <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/20 text-accent-lime text-[10px] sm:text-[11px] font-bold uppercase tracking-widest mb-3">
             <Users size={14} />
-            <span>Community Impact</span>
+            <span>Positions of Responsibility</span>
           </div>
 
           <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight">
-            Community Impact
+            Positions of Responsibility
           </h2>
 
           <p className="mt-3 sm:mt-4 text-sm sm:text-base md:text-xl text-white/70 max-w-3xl leading-relaxed font-normal">
-            <strong className="text-white font-black">Mentored 5,000+ students</strong> through developer workshops, tech communities, and hands-on mentoring sessions focused on building real-world projects.
+            Driving student-led initiatives across technical mentoring, industry engagement, and event leadership, creating opportunities for students to learn, connect, and build real-world experience.
           </p>
         </div>
 
         {/* Pinterest-Style Masonry Grid */}
         {items.length === 0 ? (
           <div className="py-12 sm:py-16 text-center rounded-3xl border border-white/5 bg-white/[0.02]">
-            <p className="text-white/40 text-xs sm:text-sm">No community photos uploaded yet. Add photos from the Admin CMS.</p>
+            <p className="text-white/40 text-xs sm:text-sm">No photos uploaded yet. Add photos from the Admin CMS.</p>
           </div>
         ) : (
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-3 sm:gap-4">
@@ -56,7 +56,7 @@ export default function Community() {
                 {/* Natural aspect-ratio image - never cropped or forced */}
                 <img
                   src={item.image}
-                  alt={item.title || 'Community Impact'}
+                  alt={item.title || 'Position of Responsibility'}
                   loading="lazy"
                   className="w-full h-auto block object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
                 />
@@ -125,7 +125,7 @@ export default function Community() {
               <div className="max-h-[55vh] sm:max-h-[72vh] overflow-hidden bg-black/40 flex items-center justify-center">
                 <img
                   src={activeItem.image}
-                  alt={activeItem.title || 'Community Photo'}
+                  alt={activeItem.title || 'Responsibility Photo'}
                   className="max-h-[55vh] sm:max-h-[72vh] w-auto object-contain mx-auto"
                 />
               </div>
@@ -135,7 +135,7 @@ export default function Community() {
                   <div>
                     <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
                       <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-accent-lime/10 border border-accent-lime/20 text-accent-lime text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-                        {activeItem.tag || 'Community'}
+                        {activeItem.tag || 'Responsibility'}
                       </span>
                       {activeItem.date && (
                         <span className="text-white/40 text-[11px] sm:text-xs font-medium">{activeItem.date}</span>

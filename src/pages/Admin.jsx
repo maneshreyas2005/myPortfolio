@@ -72,14 +72,16 @@ export default function Admin() {
   const [expModal, setExpModal] = useState(false);
   const [editingExp, setEditingExp] = useState(null);
   const [expForm, setExpForm] = useState({
-    role: '', company: '', period: '', location: '', type: 'On-site', points: ''
+    role: '', company: '', period: '', location: '', type: 'On-site', points: '', image: '', sortOrder: 0
   });
+  const [expFile, setExpFile] = useState(null);
+  const [expPreview, setExpPreview] = useState('');
 
   // Project Modal State
   const [projModal, setProjModal] = useState(false);
   const [editingProj, setEditingProj] = useState(null);
   const [projForm, setProjForm] = useState({
-    title: '', tech: '', description: '', image: '', sortOrder: 0
+    title: '', tech: '', description: '', detailedInfo: '', features: '', liveUrl: '', githubUrl: '', image: '', sortOrder: 0
   });
   const [projFile, setProjFile] = useState(null);
   const [projPreview, setProjPreview] = useState('');
@@ -185,7 +187,30 @@ export default function Admin() {
 
     setLoading(true);
     try {
-      const payload = { ...expForm, points: pointsArray };
+      let payload;
+      if (expFile) {
+        payload = new FormData();
+        payload.append('role', expForm.role);
+        payload.append('company', expForm.company);
+        payload.append('period', expForm.period);
+        payload.append('location', expForm.location || '');
+        payload.append('type', expForm.type || 'On-site');
+        payload.append('points', JSON.stringify(pointsArray));
+        payload.append('sortOrder', expForm.sortOrder || 0);
+        payload.append('image', expFile);
+      } else {
+        payload = {
+          role: expForm.role,
+          company: expForm.company,
+          period: expForm.period,
+          location: expForm.location || '',
+          type: expForm.type || 'On-site',
+          points: pointsArray,
+          image: expForm.image || '',
+          sortOrder: Number(expForm.sortOrder) || 0
+        };
+      }
+
       if (editingExp) {
         await updateExperienceApi(editingExp._id, payload, adminToken);
         showToast('Experience updated');
@@ -195,6 +220,8 @@ export default function Admin() {
       }
       setExpModal(false);
       setEditingExp(null);
+      setExpFile(null);
+      setExpPreview('');
       await refreshData();
     } catch (err) {
       showToast(err.message, 'error');
@@ -221,6 +248,10 @@ export default function Admin() {
       ? projForm.tech
       : projForm.tech.split(',').map(t => t.trim()).filter(Boolean);
 
+    const featuresArray = Array.isArray(projForm.features)
+      ? projForm.features
+      : (projForm.features || '').split('\n').map(f => f.trim()).filter(Boolean);
+
     setLoading(true);
     try {
       let payload;
@@ -229,6 +260,10 @@ export default function Admin() {
         payload.append('title', projForm.title);
         payload.append('tech', JSON.stringify(techArray));
         payload.append('description', projForm.description);
+        payload.append('detailedInfo', projForm.detailedInfo || '');
+        payload.append('features', JSON.stringify(featuresArray));
+        payload.append('liveUrl', projForm.liveUrl || '');
+        payload.append('githubUrl', projForm.githubUrl || '');
         payload.append('sortOrder', projForm.sortOrder || 0);
         payload.append('image', projFile);
       } else {
@@ -236,6 +271,10 @@ export default function Admin() {
           title: projForm.title,
           tech: techArray,
           description: projForm.description,
+          detailedInfo: projForm.detailedInfo || '',
+          features: featuresArray,
+          liveUrl: projForm.liveUrl || '',
+          githubUrl: projForm.githubUrl || '',
           image: projForm.image || '/images/photo3.jpeg',
           sortOrder: Number(projForm.sortOrder) || 0
         };
@@ -335,10 +374,10 @@ export default function Admin() {
 
       if (editingCom) {
         await updateCommunityItemApi(editingCom._id, payload, adminToken);
-        showToast('Community photo updated');
+        showToast('Responsibility photo updated');
       } else {
         await addCommunityItemApi(payload, adminToken);
-        showToast('New community photo uploaded');
+        showToast('New responsibility photo uploaded');
       }
       setComModal(false);
       setEditingCom(null);
@@ -353,11 +392,11 @@ export default function Admin() {
   };
 
   const handleDeleteCommunity = async (id) => {
-    if (!window.confirm('Delete this community photo?')) return;
+    if (!window.confirm('Delete this responsibility photo?')) return;
     try {
       await deleteCommunityItemApi(id, adminToken);
       await refreshData();
-      showToast('Community photo removed');
+      showToast('Responsibility photo removed');
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -567,7 +606,7 @@ export default function Admin() {
             { id: 'skills', label: 'Skills Stack', icon: <Code size={18} /> },
             { id: 'projects', label: 'Projects', icon: <FolderGit2 size={18} /> },
             { id: 'experience', label: 'Experience', icon: <Briefcase size={18} /> },
-            { id: 'community', label: 'Community Impact', icon: <Users size={18} /> },
+            { id: 'community', label: 'Positions of Responsibility', icon: <Users size={18} /> },
             { id: 'education', label: 'Education', icon: <GraduationCap size={18} /> },
             { id: 'backup', label: 'Backup & JSON', icon: <Download size={18} /> }
           ].map((tab) => (
@@ -612,7 +651,7 @@ export default function Admin() {
                   </div>
                   <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
                     <span className="text-3xl font-black text-accent-lime">{community?.length || 0}</span>
-                    <p className="text-xs text-white/40 uppercase font-bold tracking-wider mt-1">Community</p>
+                    <p className="text-xs text-white/40 uppercase font-bold tracking-wider mt-1">Responsibilities</p>
                   </div>
                   <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
                     <span className="text-3xl font-black text-blue-400">{education?.length || 0}</span>
@@ -831,7 +870,17 @@ export default function Admin() {
                 <button
                   onClick={() => {
                     setEditingProj(null);
-                    setProjForm({ title: '', tech: '', description: '', image: '', sortOrder: projects.length + 1 });
+                    setProjForm({
+                      title: '',
+                      tech: '',
+                      description: '',
+                      detailedInfo: '',
+                      features: '',
+                      liveUrl: '',
+                      githubUrl: '',
+                      image: '',
+                      sortOrder: projects.length + 1
+                    });
                     setProjFile(null);
                     setProjPreview('');
                     setProjModal(true);
@@ -860,6 +909,10 @@ export default function Admin() {
                               title: proj.title,
                               tech: Array.isArray(proj.tech) ? proj.tech.join(', ') : proj.tech,
                               description: proj.description,
+                              detailedInfo: proj.detailedInfo || '',
+                              features: Array.isArray(proj.features) ? proj.features.join('\n') : (proj.features || ''),
+                              liveUrl: proj.liveUrl || '',
+                              githubUrl: proj.githubUrl || '',
                               image: proj.image,
                               sortOrder: proj.sortOrder || 0
                             });
@@ -911,7 +964,9 @@ export default function Admin() {
                 <button
                   onClick={() => {
                     setEditingExp(null);
-                    setExpForm({ role: '', company: '', period: '', location: '', type: 'On-site', points: '' });
+                    setExpForm({ role: '', company: '', period: '', location: '', type: 'On-site', points: '', image: '', sortOrder: (experience?.length || 0) + 1 });
+                    setExpFile(null);
+                    setExpPreview('');
                     setExpModal(true);
                   }}
                   className="px-4 py-2.5 bg-accent-lime hover:bg-[#d5ff6b] text-[#151312] font-black text-xs rounded-2xl flex items-center gap-2 transition-all cursor-pointer"
@@ -923,23 +978,32 @@ export default function Admin() {
 
               <div className="space-y-4">
                 {experience.map((exp, idx) => (
-                  <div key={exp._id || idx} className="bg-[#161413] border border-white/10 rounded-3xl p-6 flex flex-col md:flex-row justify-between gap-4">
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center gap-3">
-                        <h3 className="text-xl font-bold">{exp.role}</h3>
-                        <span className="text-xs font-bold text-[#F46C38] px-3 py-0.5 rounded-full bg-[#F46C38]/10 border border-[#F46C38]/20">
-                          {exp.period}
-                        </span>
+                  <div key={exp._id || idx} className="bg-[#161413] border border-white/10 rounded-3xl p-6 flex flex-col md:flex-row justify-between gap-4 items-start">
+                    <div className="flex gap-4 flex-1 items-start">
+                      {exp.image && (
+                        <img
+                          src={exp.image}
+                          alt={exp.company}
+                          className="w-14 h-14 rounded-2xl object-cover border border-white/15 bg-white/5 shrink-0"
+                        />
+                      )}
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-xl font-bold">{exp.role}</h3>
+                          <span className="text-xs font-bold text-[#F46C38] px-3 py-0.5 rounded-full bg-[#F46C38]/10 border border-[#F46C38]/20">
+                            {exp.period}
+                          </span>
+                        </div>
+                        <p className="text-white/60 text-sm font-semibold">{exp.company} • {exp.location} ({exp.type})</p>
+                        <ul className="list-disc list-inside text-xs text-white/50 space-y-1 pt-2">
+                          {(exp.points || []).map((pt, i) => (
+                            <li key={i} className="line-clamp-1">{pt}</li>
+                          ))}
+                        </ul>
                       </div>
-                      <p className="text-white/60 text-sm font-semibold">{exp.company} • {exp.location} ({exp.type})</p>
-                      <ul className="list-disc list-inside text-xs text-white/50 space-y-1 pt-2">
-                        {(exp.points || []).map((pt, i) => (
-                          <li key={i} className="line-clamp-1">{pt}</li>
-                        ))}
-                      </ul>
                     </div>
 
-                    <div className="flex items-center gap-2 self-start">
+                    <div className="flex items-center gap-2 self-start shrink-0">
                       <button
                         onClick={() => {
                           setEditingExp(exp);
@@ -949,8 +1013,12 @@ export default function Admin() {
                             period: exp.period,
                             location: exp.location || '',
                             type: exp.type || 'On-site',
-                            points: Array.isArray(exp.points) ? exp.points.join('\n') : exp.points
+                            points: Array.isArray(exp.points) ? exp.points.join('\n') : exp.points,
+                            image: exp.image || '',
+                            sortOrder: exp.sortOrder || 0
                           });
+                          setExpFile(null);
+                          setExpPreview(exp.image || '');
                           setExpModal(true);
                         }}
                         className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
@@ -970,13 +1038,13 @@ export default function Admin() {
             </motion.div>
           )}
 
-          {/* TAB: COMMUNITY IMPACT */}
+          {/* TAB: POSITIONS OF RESPONSIBILITY */}
           {activeTab === 'community' && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-black">Community Impact Gallery</h2>
-                  <p className="text-xs text-white/40 mt-1">Manage workshop photos, mentoring sessions, and event highlights</p>
+                  <h2 className="text-2xl font-black">Positions of Responsibility Gallery</h2>
+                  <p className="text-xs text-white/40 mt-1">Manage leadership roles, mentoring sessions, and event highlights</p>
                 </div>
                 <button
                   onClick={() => {
@@ -995,7 +1063,7 @@ export default function Admin() {
 
               {(!community || community.length === 0) ? (
                 <div className="p-12 text-center rounded-3xl bg-[#161413] border border-white/10">
-                  <p className="text-white/40 text-sm">No community photos uploaded yet. Click "Add Photo / Event" above to upload your first workshop photo.</p>
+                  <p className="text-white/40 text-sm">No photos uploaded yet. Click "Add Photo / Event" above to upload your first event photo.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1004,7 +1072,7 @@ export default function Admin() {
                       <div className="h-48 bg-white/5 relative overflow-hidden">
                         <img
                           src={item.image}
-                          alt={item.title || 'Community Impact'}
+                          alt={item.title || 'Position of Responsibility'}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute top-3 right-3 flex items-center gap-2">
@@ -1036,7 +1104,7 @@ export default function Admin() {
                         </div>
 
                         <span className="absolute bottom-3 left-3 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-accent-lime font-bold text-[10px] uppercase tracking-wider border border-white/10">
-                          {item.tag || 'Community'}
+                          {item.tag || 'Responsibility'}
                         </span>
                       </div>
 
@@ -1229,9 +1297,31 @@ export default function Admin() {
                   <input type="text" required value={projForm.tech} onChange={(e) => setProjForm({ ...projForm, tech: e.target.value })} placeholder="React.js, Node.js, Socket.io" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase text-white/50 mb-2">Description</label>
-                  <textarea rows={3} required value={projForm.description} onChange={(e) => setProjForm({ ...projForm, description: e.target.value })} placeholder="Brief summary of the project and impact..." className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
+                  <label className="block text-xs font-bold uppercase text-white/50 mb-2">Short Description</label>
+                  <textarea rows={3} required value={projForm.description} onChange={(e) => setProjForm({ ...projForm, description: e.target.value })} placeholder="Brief summary for card preview..." className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-white/50 mb-2">Live Demo URL</label>
+                    <input type="url" value={projForm.liveUrl} onChange={(e) => setProjForm({ ...projForm, liveUrl: e.target.value })} placeholder="https://my-app.vercel.app" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-white/50 mb-2">GitHub / Code URL</label>
+                    <input type="url" value={projForm.githubUrl} onChange={(e) => setProjForm({ ...projForm, githubUrl: e.target.value })} placeholder="https://github.com/username/repo" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase text-white/50 mb-2">Key Features & Highlights (one per line)</label>
+                  <textarea rows={3} value={projForm.features} onChange={(e) => setProjForm({ ...projForm, features: e.target.value })} placeholder="Real-time WebSocket transcription&#10;Automated AI evaluation feedback&#10;Google Cloud Drive storage pipeline" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase text-white/50 mb-2">Detailed Case Study / Product Information</label>
+                  <textarea rows={5} value={projForm.detailedInfo} onChange={(e) => setProjForm({ ...projForm, detailedInfo: e.target.value })} placeholder="Explain the problem solved, architecture design, engineering challenges faced, and results..." className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold uppercase text-white/50 mb-2">Sort Order</label>
@@ -1308,6 +1398,44 @@ export default function Admin() {
                   <label className="block text-xs font-bold uppercase text-white/50 mb-2">Bullet Points (one per line)</label>
                   <textarea rows={4} required value={expForm.points} onChange={(e) => setExpForm({ ...expForm, points: e.target.value })} placeholder="Led development of AI application..." className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none" />
                 </div>
+
+                {/* Optional Image Upload */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-xs font-bold uppercase text-white/50">Company Logo / Photo (Optional)</label>
+                    {expPreview && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setExpFile(null);
+                          setExpPreview('');
+                          setExpForm({ ...expForm, image: '' });
+                        }}
+                        className="text-[11px] font-bold text-red-400 hover:text-red-300"
+                      >
+                        Remove Image
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setExpFile(file);
+                        setExpPreview(URL.createObjectURL(file));
+                      }
+                    }}
+                    className="w-full text-xs text-white/50 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20"
+                  />
+                  {expPreview && (
+                    <div className="mt-3 w-20 h-20 rounded-xl overflow-hidden border border-white/15 bg-black/40">
+                      <img src={expPreview} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </div>
+
                 <div className="pt-4 flex justify-end gap-3">
                   <button type="button" onClick={() => setExpModal(false)} className="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 font-bold text-xs cursor-pointer">Cancel</button>
                   <button type="submit" disabled={loading} className="px-5 py-2.5 rounded-xl bg-accent-lime hover:bg-[#d5ff6b] text-[#151312] font-black text-xs cursor-pointer">Save Experience</button>
@@ -1356,13 +1484,13 @@ export default function Admin() {
         )}
       </AnimatePresence>
 
-      {/* COMMUNITY IMPACT MODAL */}
+      {/* POSITIONS OF RESPONSIBILITY MODAL */}
       <AnimatePresence>
         {comModal && (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[#161413] border border-white/10 rounded-3xl p-6 sm:p-8 w-full max-w-xl my-8">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold">{editingCom ? 'Edit Community Photo' : 'Upload Community Photo'}</h3>
+                <h3 className="text-xl font-bold">{editingCom ? 'Edit Responsibility Photo' : 'Upload Responsibility Photo'}</h3>
                 <button onClick={() => setComModal(false)} className="p-2 rounded-xl bg-white/5 text-white/60 hover:text-white cursor-pointer"><X size={18} /></button>
               </div>
               <form onSubmit={handleSaveCommunity} className="space-y-4">

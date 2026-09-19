@@ -57,11 +57,22 @@ const StorytellingCard = ({ exp, index, total, scrollYProgress }) => {
 // Internal card content details
 const CardContent = ({ exp }) => (
     <>
-        {/* Role and Period */}
+        {/* Role, Logo/Photo, and Period */}
         <div className="mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <h4 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">
-                {exp.role}
-            </h4>
+            <div className="flex items-center gap-3.5">
+                {exp.image && (
+                    <img
+                        src={exp.image}
+                        alt={exp.company || 'Experience image'}
+                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border border-white/15 bg-white/5 shrink-0 shadow-md"
+                    />
+                )}
+                <div>
+                    <h4 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">
+                        {exp.role}
+                    </h4>
+                </div>
+            </div>
             <span className="text-xs sm:text-sm font-bold text-accent-orange/80 bg-accent-orange/5 px-3.5 py-1 rounded-full border border-accent-orange/20 whitespace-nowrap self-start">
                 {exp.period}
             </span>
@@ -180,15 +191,25 @@ const Experience = () => {
                                 <div className="absolute left-[-7px] sm:left-[-9px] top-1 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-accent-lime shadow-[0_0_15px_rgba(197,255,65,0.5)]"></div>
 
                                 <div className="mb-2 flex flex-col justify-between gap-1.5 sm:gap-2">
-                                    <h4 className="text-lg sm:text-xl font-bold text-white">
-                                        {exp.role}
-                                    </h4>
+                                    <div className="flex items-center gap-3">
+                                        {exp.image && (
+                                            <img
+                                                src={exp.image}
+                                                alt={exp.company}
+                                                className="w-10 h-10 rounded-xl object-cover border border-white/15 bg-white/5 shrink-0 shadow"
+                                            />
+                                        )}
+                                        <div>
+                                            <h4 className="text-lg sm:text-xl font-bold text-white">
+                                                {exp.role}
+                                            </h4>
+                                            <h5 className="text-sm font-bold text-white/50">{exp.company}</h5>
+                                        </div>
+                                    </div>
                                     <span className="text-[10px] sm:text-xs font-bold text-accent-orange/80 bg-accent-orange/5 px-2.5 sm:px-3 py-0.5 rounded-full border border-accent-orange/20 whitespace-nowrap self-start">
                                         {exp.period}
                                     </span>
                                 </div>
-
-                                <h5 className="text-sm sm:text-base font-bold text-white/50 mb-1">{exp.company}</h5>
                                 {(exp.location || exp.type) && (
                                     <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
                                         {exp.location && (

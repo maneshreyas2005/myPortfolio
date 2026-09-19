@@ -4,6 +4,7 @@ const router = express.Router();
 const Project = require('../models/projectModel');
 const upload = require('../middleware/upload');
 const { authenticate } = require('../middleware/auth');
+const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinaryService');
 
 // Helper to parse tech field which can be JSON string or array
 const parseTech = (tech) => {
@@ -59,15 +60,36 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Helper to parse features array
+const parseFeatures = (features) => {
+  if (!features) return [];
+  if (Array.isArray(features)) return features;
+  if (typeof features === 'string') {
+    try {
+      const parsed = JSON.parse(features);
+      return Array.isArray(parsed) ? parsed : [features];
+    } catch {
+      return features.split('\n').map(s => s.trim()).filter(Boolean);
+    }
+  }
+  return [];
+};
+
 // @route   POST /api/projects
 // @desc    Add new project
 // @access  Private
 router.post('/', authenticate, upload.single('image'), async (req, res) => {
   try {
-    const { title, tech, description, sortOrder } = req.body;
+    const { title, tech, description, detailedInfo, features, liveUrl, githubUrl, sortOrder } = req.body;
     let image = req.body.image || '/images/photo3.jpeg';
+    let imagePublicId = null;
+
     if (req.file) {
-      image = `/uploads/${req.file.filename}`;
+      const uploadResult = await uploadToCloudinary(req.file.buffer, {
+        folder: 'portfolio/projects'
+      });
+      image = uploadResult.secure_url;
+      imagePublicId = uploadResult.public_id;
     }
     
     if (!title || !description) {
@@ -81,13 +103,19 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
       title,
       tech: parseTech(tech),
       description,
+      detailedInfo: detailedInfo || '',
+      features: parseFeatures(features),
+      liveUrl: liveUrl || '',
+      githubUrl: githubUrl || '',
       image,
-      sortOrder: sortOrder ? Number(sortOrder) : 0
+      imagePublicId,
+      sortOrder: sortOrder !== undefined && sortOrder !== '' ? Number(sortOrder) : 0
     });
     
     await project.save();
     res.status(201).json(project);
   } catch (err) {
+    console.error('Error adding project:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -97,7 +125,7 @@ router.post('/', authenticate, upload.single('image'), async (req, res) => {
 // @access  Private
 router.put('/:id', authenticate, upload.single('image'), async (req, res) => {
   try {
-    const { title, tech, description, sortOrder } = req.body;
+    const { title, tech, description, detailedInfo, features, liveUrl, githubUrl, sortOrder } = req.body;
     const existing = await findProjectByIdOrSlug(req.params.id);
     
     if (!existing) {
@@ -107,13 +135,33 @@ router.put('/:id', authenticate, upload.single('image'), async (req, res) => {
     const updateData = {};
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description;
+    if (detailedInfo !== undefined) updateData.detailedInfo = detailedInfo;
+    if (features !== undefined) updateData.features = parseFeatures(features);
+    if (liveUrl !== undefined) updateData.liveUrl = liveUrl;
+    if (githubUrl !== undefined) updateData.githubUrl = githubUrl;
     if (tech !== undefined) updateData.tech = parseTech(tech);
-    if (sortOrder !== undefined) updateData.sortOrder = Number(sortOrder);
+    if (sortOrder !== undefined && sortOrder !== '') updateData.sortOrder = Number(sortOrder);
+    
     if (req.file) {
-      updateData.image = `/uploads/${req.file.filename}`;
-    } else if (req.body.image) {
+      const uploadResult = await uploadToCloudinary(req.file.buffer, {
+        folder: 'portfolio/projects'
+      });
+      
+      // Delete old asset from Cloudinary if existed
+      if (existing.imagePublicId) {
+        await deleteFromCloudinary(existing.imagePublicId);
+      }
+
+      updateData.image = uploadResult.secure_url;
+      updateData.imagePublicId = uploadResult.public_id;
+    } else if (req.body.image && req.body.image !== existing.image) {
+      if (existing.imagePublicId) {
+        await deleteFromCloudinary(existing.imagePublicId);
+        updateData.imagePublicId = null;
+      }
       updateData.image = req.body.image;
     }
+
     if (req.body.id) {
       updateData.id = req.body.id;
     }
@@ -126,6 +174,7 @@ router.put('/:id', authenticate, upload.single('image'), async (req, res) => {
     
     res.json(updated);
   } catch (err) {
+    console.error('Error updating project:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -141,9 +190,15 @@ router.delete('/:id', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'Project not found' });
     }
 
+    // Delete asset from Cloudinary if it exists
+    if (project.imagePublicId) {
+      await deleteFromCloudinary(project.imagePublicId);
+    }
+
     await Project.findByIdAndDelete(project._id);
     res.json({ message: 'Project removed' });
   } catch (err) {
+    console.error('Error deleting project:', err);
     res.status(500).json({ error: err.message });
   }
 });

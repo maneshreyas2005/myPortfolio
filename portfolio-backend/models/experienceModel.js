@@ -6,6 +6,8 @@ const experienceSchema = new mongoose.Schema({
   location: { type: String },
   type: { type: String },
   points: [{ type: String, required: true }],
+  image: { type: String, default: null },
+  imagePublicId: { type: String, default: null },
   sortOrder: { type: Number, default: 0 }
 }, { timestamps: true });
 
