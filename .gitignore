@@ -11,6 +11,13 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+.env.*
+!.env.example
+/portfolio-backend/node_modules
+/portfolio-backend/.env
+/portfolio-backend/uploads
+
 
 # Editor directories and files
 .vscode/*

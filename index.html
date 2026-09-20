@@ -3,9 +3,19 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" href="/public/images/Screenshot 2026-09-19 205836.png" />
+  <link rel="icon" type="image/png" href="/images/Screenshot 2026-09-19 205836.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shreyas Mane | Portfolio</title>
+  <script>
+    // Disable React Developer Tools in production to protect component state and props
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      if (typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__ === 'object') {
+        for (const [key, value] of Object.entries(window.__REACT_DEVTOOLS_GLOBAL_HOOK__)) {
+          window.__REACT_DEVTOOLS_GLOBAL_HOOK__[key] = typeof value === 'function' ? () => {} : null;
+        }
+      }
+    }
+  </script>
 </head>
 
 <body>

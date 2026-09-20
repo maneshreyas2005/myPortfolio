@@ -1,10 +1,13 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-const AtlasURL = process.env.MONGODB_URI || 'mongodb+srv://maneshreyas272_db_user:GjP7nrHrqoVKRE1b@cluster0.clhbqx1.mongodb.net/?appName=Cluster0';
+const AtlasURL = process.env.MONGODB_URI || process.env.MONGO_URI;
 
 const connectDB = async () => {
   try {
+    if (!AtlasURL) {
+      throw new Error('MONGODB_URI is not defined in environment variables');
+    }
     const conn = await mongoose.connect(AtlasURL);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {

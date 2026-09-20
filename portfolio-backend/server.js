@@ -3,6 +3,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const profileRoutes = require('./routes/profile');
@@ -19,9 +22,65 @@ const app = express();
 // Connect to MongoDB Atlas
 connectDB();
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// 1. Security HTTP Headers with Helmet
+// Allow cross-origin resource policy so images and uploads can load on frontend
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// 2. CORS Configuration (Allow configured frontend domain & local dev)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.FRONTEND_URL,
+  ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : [])
+].filter(Boolean);
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin is explicitly allowed or matches a deploy preview
+    const isAllowed = allowedOrigins.some(allowed => 
+      allowed === origin || origin.endsWith('.vercel.app') || origin.endsWith('.netlify.app')
+    );
+    
+    if (isAllowed || process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    } else {
+      return callback(new Error('CORS policy: Access denied for this origin.'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// 3. Rate Limiting to prevent brute-force attacks
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 login requests per 15 minutes
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many login attempts from this IP, please try again after 15 minutes' }
+});
+
+const generalApiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300, // Limit each IP to 300 requests per 15 minutes
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Apply rate limiting
+app.use('/api/auth/login', authLimiter);
+app.use('/api', generalApiLimiter);
+
+// 4. Request Body Parsing & NoSQL Injection Sanitization
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(mongoSanitize());
 
 // Serve uploaded media statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -36,27 +95,12 @@ app.use('/api/education', educationRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api', exportRoutes);
 
-// Health check route
+// Secure Health check route (does not expose internal endpoints)
 app.get('/', (req, res) => {
   res.json({
-    message: 'Portfolio Backend API is running...',
-    endpoints: {
-      auth: '/api/auth/login',
-      profile: '/api/profile',
-      skills: '/api/skills',
-      experience: '/api/experience',
-      projects: '/api/projects',
-      education: '/api/education',
-      export: '/api/export',
-      import: '/api/import',
-      admin: '/admin'
-    }
+    status: 'online',
+    timestamp: new Date().toISOString()
   });
-});
-
-// Admin redirect route to frontend CMS
-app.get('/admin', (req, res) => {
-  res.redirect('http://localhost:5173/admin');
 });
 
 // Error handler middleware
