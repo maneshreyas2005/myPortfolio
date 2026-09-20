@@ -75,7 +75,7 @@ export const fetchProjectsData = async () => {
     const res = await fetch(`${API_BASE}/projects`);
     if (!res.ok) throw new Error(`Projects fetch failed with status ${res.status}`);
     const data = await res.json();
-    if (Array.isArray(data) && data.length > 0) {
+    if (Array.isArray(data)) {
       return data;
     }
     return resumeData.projects;

@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 const Project = require('../models/projectModel');
 const upload = require('../middleware/upload');
@@ -23,12 +24,17 @@ const parseTech = (tech) => {
 
 // Helper to find project by id slug or MongoDB _id
 const findProjectByIdOrSlug = async (param) => {
+  if (!param) return null;
+  const strParam = String(param).trim();
   let project = null;
-  // Try finding by custom id slug
-  project = await Project.findOne({ id: param });
-  if (!project && param.match(/^[0-9a-fA-F]{24}$/)) {
-    // If not found by slug and param is a valid ObjectId, try _id
-    project = await Project.findById(param);
+
+  // 1. Try finding by MongoDB _id first if it's a valid ObjectId
+  if (mongoose.Types.ObjectId.isValid(strParam)) {
+    project = await Project.findById(strParam);
+  }
+  // 2. If not found by _id, try finding by custom slug/id field
+  if (!project) {
+    project = await Project.findOne({ id: strParam });
   }
   return project;
 };
