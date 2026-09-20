@@ -103,7 +103,7 @@ const ProjectRow = ({ project, index }) => {
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        navigate(`/project/${project.id}`);
+                                        navigate(`/project/${project.id || project._id}`);
                                     }}
                                     className="mb-2 sm:mb-6 inline-flex items-center gap-1 text-accent-orange text-sm sm:text-base font-black uppercase tracking-widest hover:gap-2 transition-all duration-300 w-fit"
                                 >

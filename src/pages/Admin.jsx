@@ -542,11 +542,10 @@ export default function Admin() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className={`fixed top-6 right-6 z-50 px-5 py-3 rounded-2xl border shadow-2xl flex items-center gap-2 text-sm font-bold ${
-              toast.type === 'error'
-                ? 'bg-red-500/10 border-red-500/30 text-red-400'
-                : 'bg-accent-lime/10 border-accent-lime/30 text-accent-lime'
-            }`}
+            className={`fixed top-6 right-6 z-50 px-5 py-3 rounded-2xl border shadow-2xl flex items-center gap-2 text-sm font-bold ${toast.type === 'error'
+              ? 'bg-red-500/10 border-red-500/30 text-red-400'
+              : 'bg-accent-lime/10 border-accent-lime/30 text-accent-lime'
+              }`}
           >
             {toast.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
             <span>{toast.msg}</span>
@@ -613,11 +612,10 @@ export default function Admin() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-bold transition-all duration-300 text-left cursor-pointer whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'bg-[#F46C38] text-white shadow-lg shadow-[#F46C38]/20'
-                  : 'bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/5'
-              }`}
+              className={`flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs font-bold transition-all duration-300 text-left cursor-pointer whitespace-nowrap ${activeTab === tab.id
+                ? 'bg-[#F46C38] text-white shadow-lg shadow-[#F46C38]/20'
+                : 'bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/5'
+                }`}
             >
               {tab.icon}
               <span>{tab.label}</span>
@@ -906,14 +904,14 @@ export default function Admin() {
                           onClick={() => {
                             setEditingProj(proj);
                             setProjForm({
-                              title: proj.title,
-                              tech: Array.isArray(proj.tech) ? proj.tech.join(', ') : proj.tech,
-                              description: proj.description,
+                              title: proj.title || '',
+                              tech: Array.isArray(proj.tech) ? proj.tech.join(', ') : (proj.tech || ''),
+                              description: proj.description || '',
                               detailedInfo: proj.detailedInfo || '',
                               features: Array.isArray(proj.features) ? proj.features.join('\n') : (proj.features || ''),
                               liveUrl: proj.liveUrl || '',
                               githubUrl: proj.githubUrl || '',
-                              image: proj.image,
+                              image: proj.image || '',
                               sortOrder: proj.sortOrder || 0
                             });
                             setProjFile(null);
@@ -1287,7 +1285,7 @@ export default function Admin() {
                 <h3 className="text-xl font-bold">{editingProj ? 'Edit Project' : 'New Project'}</h3>
                 <button onClick={() => setProjModal(false)} className="p-2 rounded-xl bg-white/5 text-white/60 hover:text-white cursor-pointer"><X size={18} /></button>
               </div>
-              <form onSubmit={handleSaveProj} className="space-y-4">
+              <form onSubmit={handleSaveProj} className="space-y-4 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar">
                 <div>
                   <label className="block text-xs font-bold uppercase text-white/50 mb-2">Project Title</label>
                   <input type="text" required value={projForm.title} onChange={(e) => setProjForm({ ...projForm, title: e.target.value })} placeholder="e.g. AI Interviewer" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
@@ -1297,31 +1295,27 @@ export default function Admin() {
                   <input type="text" required value={projForm.tech} onChange={(e) => setProjForm({ ...projForm, tech: e.target.value })} placeholder="React.js, Node.js, Socket.io" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase text-white/50 mb-2">Short Description</label>
-                  <textarea rows={3} required value={projForm.description} onChange={(e) => setProjForm({ ...projForm, description: e.target.value })} placeholder="Brief summary for card preview..." className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
+                  <label className="block text-xs font-bold uppercase text-white/50 mb-2">Short Summary / Card Description</label>
+                  <textarea rows={2} required value={projForm.description} onChange={(e) => setProjForm({ ...projForm, description: e.target.value })} placeholder="Brief summary of the project shown on the home page card..." className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase text-white/50 mb-2">Detailed Project Info / Overview (For Project Details Page)</label>
+                  <textarea rows={4} value={projForm.detailedInfo} onChange={(e) => setProjForm({ ...projForm, detailedInfo: e.target.value })} placeholder="Comprehensive explanation of what you built, backend architecture, problem statement, and engineering challenges..." className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase text-white/50 mb-2">Key Features & Highlights (One per line)</label>
+                  <textarea rows={3} value={projForm.features} onChange={(e) => setProjForm({ ...projForm, features: e.target.value })} placeholder="35+ secure REST API endpoints across 6 core modules&#10;JWT-based authentication and role-based access control&#10;Integrated backend workflows for inventory and billing" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold uppercase text-white/50 mb-2">Live Demo URL</label>
-                    <input type="url" value={projForm.liveUrl} onChange={(e) => setProjForm({ ...projForm, liveUrl: e.target.value })} placeholder="https://my-app.vercel.app" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
+                    <input type="url" value={projForm.liveUrl} onChange={(e) => setProjForm({ ...projForm, liveUrl: e.target.value })} placeholder="https://yourproject.com" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-white/50 mb-2">GitHub / Code URL</label>
-                    <input type="url" value={projForm.githubUrl} onChange={(e) => setProjForm({ ...projForm, githubUrl: e.target.value })} placeholder="https://github.com/username/repo" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
+                    <label className="block text-xs font-bold uppercase text-white/50 mb-2">GitHub / Source Code URL</label>
+                    <input type="url" value={projForm.githubUrl} onChange={(e) => setProjForm({ ...projForm, githubUrl: e.target.value })} placeholder="https://github.com/..." className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
                   </div>
                 </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase text-white/50 mb-2">Key Features & Highlights (one per line)</label>
-                  <textarea rows={3} value={projForm.features} onChange={(e) => setProjForm({ ...projForm, features: e.target.value })} placeholder="Real-time WebSocket transcription&#10;Automated AI evaluation feedback&#10;Google Cloud Drive storage pipeline" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase text-white/50 mb-2">Detailed Case Study / Product Information</label>
-                  <textarea rows={5} value={projForm.detailedInfo} onChange={(e) => setProjForm({ ...projForm, detailedInfo: e.target.value })} placeholder="Explain the problem solved, architecture design, engineering challenges faced, and results..." className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-[#F46C38]" />
-                </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold uppercase text-white/50 mb-2">Sort Order</label>
@@ -1495,6 +1489,7 @@ export default function Admin() {
               </div>
               <form onSubmit={handleSaveCommunity} className="space-y-4">
                 <div>
+
                   <label className="block text-xs font-bold uppercase text-white/50 mb-2">Event / Workshop Title</label>
                   <input
                     type="text"

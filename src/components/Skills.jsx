@@ -270,7 +270,7 @@ const Skills = () => {
                     <div className="grid grid-cols-3 gap-2 sm:gap-6 md:flex md:justify-center md:gap-24 w-full">
                         <StatItem numericValue={2} suffix="+" label="Internships" color="#F46C38" started={isInView} />
                         <StatItem numericValue={5} suffix="+" label="Projects" color="#C5FF41" started={isInView} />
-                        <StatItem numericValue={null} suffix="AI" label="Specialist" color="#FF2600" started={isInView} />
+                        <StatItem numericValue={10} suffix="+" label="Technologies" color="#FF2600" started={isInView} />
                     </div>
                     <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mt-8 sm:mt-12" />
                 </motion.div>

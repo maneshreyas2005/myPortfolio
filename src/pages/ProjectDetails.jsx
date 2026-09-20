@@ -48,7 +48,7 @@ const ProjectDetails = () => {
                 >
                     <div className="aspect-video w-full rounded-2xl sm:rounded-3xl overflow-hidden mb-6 sm:mb-12 bg-white/5 border border-white/10">
                         <img
-                            src={project.image}
+                            src={project.image || '/images/photo3.jpeg'}
                             alt={project.title}
                             className="w-full h-full object-cover"
                         />
@@ -59,7 +59,7 @@ const ProjectDetails = () => {
                     </h1>
 
                     <div className="flex flex-wrap gap-2 sm:gap-3 mb-8 sm:mb-12">
-                        {project.tech.map((tech, i) => (
+                        {(Array.isArray(project.tech) ? project.tech : (project.tech ? String(project.tech).split(',').map(t => t.trim()) : [])).map((tech, i) => (
                             <span
                                 key={i}
                                 className="text-[10px] sm:text-xs md:text-sm font-bold uppercase tracking-widest px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/5 border border-white/10 text-accent-orange"
