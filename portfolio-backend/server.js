@@ -85,8 +85,11 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(mongoSanitize());
 
-// Serve uploaded media statically
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Serve uploaded media statically with long-term browser cache
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  maxAge: '30d',
+  immutable: true
+}));
 
 // API Routes
 app.use('/api/auth', authRoutes);

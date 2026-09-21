@@ -3,6 +3,7 @@ import { Github, Linkedin, Mail, Phone } from 'lucide-react';
 import { resumeData } from '../data';
 import { useState } from 'react';
 import { usePortfolio } from '../context/PortfolioContext';
+import OptimizedImage from './OptimizedImage';
 
 /* ─────────────────────────────────────────
    Infinite horizontal marquee — behind the card
@@ -129,10 +130,16 @@ export const HeroCard = ({ className = "" }) => {
                         <div
                             className="relative z-10 w-[78%] h-[78%] rounded-full overflow-hidden border-[6px] sm:border-[8px] border-white shadow-xl transition-all duration-500"
                         >
-                            <img
+                            <OptimizedImage
                                 src={data.profileImage || "/images/photo3.jpeg"}
                                 alt={data.name}
-                                className="w-full h-full object-cover object-top"
+                                priority={true}
+                                avatar={true}
+                                width={440}
+                                height={440}
+                                crop="c_fill"
+                                className="w-full h-full rounded-full"
+                                imgClassName="object-cover object-top"
                             />
                         </div>
                     </div>

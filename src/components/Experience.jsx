@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
 import { resumeData } from '../data';
 import { usePortfolio } from '../context/PortfolioContext';
+import OptimizedImage from './OptimizedImage';
 
 // Helper: Group linear experience entries by company name
 const groupExperiencesByCompany = (experiences) => {
@@ -109,10 +110,14 @@ const CardContent = ({ comp }) => (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                     {comp.image ? (
-                        <img
+                        <OptimizedImage
                             src={comp.image}
                             alt={comp.company}
-                            className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl object-cover border border-white/15 bg-white/5 shrink-0 shadow-lg p-0.5"
+                            width={128}
+                            height={128}
+                            crop="c_fit"
+                            className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl border border-white/15 bg-white/5 shrink-0 shadow-lg p-0.5"
+                            imgClassName="w-full h-full object-cover rounded-xl"
                         />
                     ) : (
                         <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl border border-white/15 bg-white/5 shrink-0 flex items-center justify-center text-accent-lime font-black text-xl sm:text-2xl shadow-lg">

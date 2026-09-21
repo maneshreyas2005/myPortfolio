@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, ExternalLink, Github } from 'lucide-react';
 import { resumeData } from '../data';
 import { usePortfolio } from '../context/PortfolioContext';
+import OptimizedImage from '../components/OptimizedImage';
 
 const ProjectDetails = () => {
     const { id } = useParams();
@@ -47,10 +48,13 @@ const ProjectDetails = () => {
                     transition={{ duration: 0.6, delay: 0.1 }}
                 >
                     <div className="aspect-video w-full rounded-2xl sm:rounded-3xl overflow-hidden mb-6 sm:mb-12 bg-white/5 border border-white/10">
-                        <img
+                        <OptimizedImage
                             src={project.image || '/images/photo3.jpeg'}
                             alt={project.title}
-                            className="w-full h-full object-cover"
+                            width={1400}
+                            priority={true}
+                            className="w-full h-full"
+                            imgClassName="w-full h-full object-cover"
                         />
                     </div>
 

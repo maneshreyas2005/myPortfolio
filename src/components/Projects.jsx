@@ -4,6 +4,7 @@ import { resumeData } from '../data';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePortfolio } from '../context/PortfolioContext';
+import OptimizedImage from './OptimizedImage';
 
 /* ─────────────────────────────────────────
    Project Row — hover to reveal preview
@@ -75,13 +76,12 @@ const ProjectRow = ({ project, index }) => {
 
                             {/* Image */}
                             <div className="md:col-span-2 aspect-video rounded-2xl overflow-hidden border border-white/5 bg-white/5">
-                                <motion.img
-                                    initial={{ scale: 1.05 }}
-                                    animate={{ scale: 1 }}
-                                    transition={{ duration: 0.6 }}
+                                <OptimizedImage
                                     src={project.image}
                                     alt={project.title}
-                                    className="w-full h-full object-cover opacity-90"
+                                    width={900}
+                                    className="w-full h-full"
+                                    imgClassName="object-cover opacity-90 transition-transform duration-500 hover:scale-105"
                                 />
                             </div>
 

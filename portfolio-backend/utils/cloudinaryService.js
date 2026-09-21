@@ -17,7 +17,11 @@ const uploadToCloudinary = (buffer, options = {}) => {
 
     const uploadOptions = {
       folder: options.folder || 'portfolio',
-      resource_type: options.resourceType || 'image'
+      resource_type: options.resourceType || 'image',
+      transformation: [
+        { quality: 'auto', fetch_format: 'auto' },
+        { width: 1920, height: 1920, crop: 'limit' }
+      ]
     };
 
     if (options.publicId) {

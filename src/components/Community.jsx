@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePortfolio } from '../context/PortfolioContext';
 import { Users, X, Maximize2, Sparkles, Calendar, Tag } from 'lucide-react';
+import OptimizedImage from './OptimizedImage';
 
 export default function Community() {
   const { community } = usePortfolio();
@@ -54,11 +55,12 @@ export default function Community() {
                 onClick={() => setActiveItem(item)}
               >
                 {/* Natural aspect-ratio image - never cropped or forced */}
-                <img
+                <OptimizedImage
                   src={item.image}
                   alt={item.title || 'Position of Responsibility'}
-                  loading="lazy"
-                  className="w-full h-auto block object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+                  width={600}
+                  className="w-full h-auto block"
+                  imgClassName="w-full h-auto block object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
                 />
 
                 {/* Hover overlay with smooth gradient */}
@@ -123,10 +125,13 @@ export default function Community() {
               </button>
 
               <div className="max-h-[55vh] sm:max-h-[72vh] overflow-hidden bg-black/40 flex items-center justify-center">
-                <img
+                <OptimizedImage
                   src={activeItem.image}
                   alt={activeItem.title || 'Responsibility Photo'}
-                  className="max-h-[55vh] sm:max-h-[72vh] w-auto object-contain mx-auto"
+                  width={1200}
+                  priority={true}
+                  className="max-h-[55vh] sm:max-h-[72vh] w-auto mx-auto flex items-center justify-center"
+                  imgClassName="max-h-[55vh] sm:max-h-[72vh] w-auto object-contain mx-auto"
                 />
               </div>
 
