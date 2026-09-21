@@ -9,7 +9,7 @@ This document details every security protection applied to the portfolio applica
 | Vulnerability / Exposure | Severity | Implemented Protection | Threat Prevented |
 |---|---|---|---|
 | **Plaintext DB Password in Code & Git** | **CRITICAL** | Git untracking, `.gitignore`, removed fallback in `db.js` | Complete database takeover, data wiping, credential theft by GitHub bots |
-| **NoSQL Query Injection** | **HIGH** | `express-mongo-sanitize` | Authentication bypass (`$ne` / `$gt` attacks), unauthorized data access |
+| **NoSQL Query Injection** | **HIGH** | `@exortek/express-mongo-sanitize` | Authentication bypass (`$ne` / `$gt` attacks), unauthorized data access |
 | **Admin Login Brute-Forcing** | **HIGH** | `express-rate-limit` (10 req/15 min) | Automated dictionary / password guessing attacks against CMS |
 | **Permissive Wildcard CORS** | **MEDIUM-HIGH** | Domain whitelist & origin validation | Malicious cross-origin API exploitation and unauthorized data scraping |
 | **Missing Security Headers** | **MEDIUM** | `helmet` HTTP headers suite | Clickjacking (`iframe` spoofing), MIME-type sniffing, XSS execution |

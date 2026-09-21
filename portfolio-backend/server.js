@@ -5,7 +5,7 @@ const cors = require('cors');
 const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const mongoSanitize = require('express-mongo-sanitize');
+const mongoSanitize = require('@exortek/express-mongo-sanitize');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const profileRoutes = require('./routes/profile');
@@ -18,6 +18,9 @@ const authRoutes = require('./routes/auth');
 const communityRoutes = require('./routes/community');
 
 const app = express();
+
+// Trust reverse proxy (Render, load balancers) for accurate client IP in express-rate-limit
+app.set('trust proxy', 1);
 
 // Connect to MongoDB Atlas
 connectDB();
