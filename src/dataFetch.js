@@ -137,6 +137,22 @@ export const fetchCommunityData = async () => {
   }
 };
 
+export const fetchCertificatesData = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/certificates`);
+    if (!res.ok) throw new Error(`Certificates fetch failed with status ${res.status}`);
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      return data;
+    }
+    return resumeData.certificates || [];
+  } catch (err) {
+    console.warn('Certificates fetch error, using local fallback:', err.message);
+    return resumeData.certificates || [];
+  }
+};
+
+
 /* ─────────────────────────────────────────
    Admin API Actions
 ───────────────────────────────────────── */
@@ -397,4 +413,46 @@ export const deleteCommunityItemApi = async (id, token) => {
   if (!res.ok) throw new Error(data.error || 'Failed to delete community item');
   return data;
 };
+
+// Certificates CRUD (supports FormData for image uploads or JSON)
+export const addCertificateItemApi = async (certData, token) => {
+  const isFormData = certData instanceof FormData;
+  const headers = { Authorization: `Bearer ${token}` };
+  if (!isFormData) headers['Content-Type'] = 'application/json';
+
+  const res = await fetch(`${API_BASE}/certificates`, {
+    method: 'POST',
+    headers,
+    body: isFormData ? certData : JSON.stringify(certData)
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to add certificate');
+  return data;
+};
+
+export const updateCertificateItemApi = async (id, certData, token) => {
+  const isFormData = certData instanceof FormData;
+  const headers = { Authorization: `Bearer ${token}` };
+  if (!isFormData) headers['Content-Type'] = 'application/json';
+
+  const res = await fetch(`${API_BASE}/certificates/${id}`, {
+    method: 'PUT',
+    headers,
+    body: isFormData ? certData : JSON.stringify(certData)
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to update certificate');
+  return data;
+};
+
+export const deleteCertificateItemApi = async (id, token) => {
+  const res = await fetch(`${API_BASE}/certificates/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to delete certificate');
+  return data;
+};
+
 
