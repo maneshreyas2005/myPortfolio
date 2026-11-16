@@ -69,8 +69,14 @@ function Home() {
     useLayoutEffect(() => {
         if (isMobile || !cardRef.current) return;
 
-        import('gsap').then(({ default: gsap }) => {
-            const ctx = gsap.context(() => {
+        let ctx;
+        Promise.all([
+            import('gsap'),
+            import('gsap/ScrollTrigger')
+        ]).then(([{ default: gsap }, { default: ScrollTrigger }]) => {
+            gsap.registerPlugin(ScrollTrigger);
+
+            ctx = gsap.context(() => {
                 const calculateLayout = () => {
                     const w = window.innerWidth;
                     const targetWidth = Math.min(360, Math.max(300, w * 0.22));
@@ -101,12 +107,23 @@ function Home() {
                         opacity: 1,
                         ease: 'power2.inOut',
                         '--card-image-size': '180px',
+                        scrollTrigger: {
+                            trigger: containerRef.current,
+                            start: 'top top',
+                            end: '+=700',
+                            scrub: 1.2,
+                            invalidateOnRefresh: true,
+                        }
                     }
                 );
-            }, containerRef);
 
-            return () => ctx.revert();
+                ScrollTrigger.refresh();
+            }, containerRef);
         });
+
+        return () => {
+            if (ctx) ctx.revert();
+        };
     }, [isMobile]);
 
     return (

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePortfolio } from '../context/PortfolioContext';
 
 /* ─────────────────────────────────────────
    Smooth ease-in-out-cubic easing
@@ -12,7 +13,7 @@ const easeInOutCubic = (t) =>
    Build wave polygon path covering the liquid
    area below the wave crest
    ───────────────────────────────────────── */
-function buildWavePath(y, phase, width = 1000, height = 320, amplitude = 14, wavelength = 360) {
+function buildWavePath(y, phase, width = 1000, height = 320, amplitude = 12, wavelength = 360) {
   const points = [];
   const step = 20;
 
@@ -41,12 +42,14 @@ const FONT_SIZE = 175;
    Preloader — Neoleaf-style liquid-fill letters
    • Dark bg (#151312)
    • Prominent "Shreyas" in Poppins 900
-   • Liquid wave rising from bottom to top
+   • Liquid wave rising from bottom to top in 1:1 sync with percentage
+   • Waits for backend API data & critical assets
    • Continuous horizontal wave ripple
    • "loading...  XX %" counter aligned bottom-right
    • Top gradient accent bar
    ───────────────────────────────────────── */
 export default function Preloader({ children }) {
+  const { loading: isBackendLoading, profile } = usePortfolio();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState(0);
@@ -54,36 +57,75 @@ export default function Preloader({ children }) {
 
   const rafRef = useRef(null);
   const progressDoneRef = useRef(false);
+  const isDataReadyRef = useRef(false);
 
-  /* ── Wave path calculation ──
-     y ranges from 255 (below letters) to 65 (above letters)
+  // Ready when both DOM/images are loaded AND backend API calls have resolved
+  isDataReadyRef.current = !isBackendLoading && isPageLoaded;
+
+  /* ── Exact wave Y calibration:
+     progress 0%   -> waveY = 260 (crest at 248px is strictly below lowest descender at 245px)
+     progress 50%  -> waveY = 165 (exact midpoint of lowercase letters)
+     progress 100% -> waveY = 70  (trough at 82px completely submerges peak of 'S' and 'h' at 84px)
   ── */
-  const waveY = 255 - (progress / 100) * 190;
+  const waveY = 260 - (progress / 100) * 190;
   const wavePath = useMemo(() => {
-    return buildWavePath(waveY, phase, VB_W, VB_H, 14, 360);
+    return buildWavePath(waveY, phase, VB_W, VB_H, 12, 360);
   }, [waveY, phase]);
 
-  /* ── 3.8s Progress animation with fluid wave phase ── */
+  const checkDismiss = useCallback(() => {
+    if (!showContent) {
+      // 350ms pause at 100% so the full white text shines before revealing content
+      const t = setTimeout(() => setShowContent(true), 350);
+      return () => clearTimeout(t);
+    }
+    return undefined;
+  }, [showContent]);
+
+  /* ── Two-stage progress animation:
+     Stage 1: 0% -> 95% over ~2.5s
+     Stage 2: Holds at 95% until isDataReadyRef is true, then smooth 400ms sprint to 100%
+  ── */
   useEffect(() => {
-    const duration = 3800; // 3.8s: balanced, clearly visible pacing
     const start = performance.now();
+    let currentProgress = 0;
+    let completing = false;
+    let completeStartTime = null;
+    let initialFromP = 95;
 
     const animate = (now) => {
-      const elapsed = now - start;
-      const t = Math.min(elapsed / duration, 1);
-      const eased = easeInOutCubic(t);
-
-      setProgress(Math.round(eased * 100));
-      // Phase rotates smoothly ~1.8 rad/sec
+      // Continuous liquid wave ripple
       setPhase((now / 1000) * 3.5);
 
-      if (t < 1) {
-        rafRef.current = requestAnimationFrame(animate);
+      if (!completing) {
+        const elapsed = now - start;
+        const targetDuration = 2500;
+        const t = Math.min(elapsed / targetDuration, 1);
+        const p = Math.round(easeInOutCubic(t) * 95);
+        currentProgress = p;
+        setProgress(p);
+
+        // If backend & assets are ready AND we have progressed to at least 90%, complete to 100%
+        if (isDataReadyRef.current && (p >= 90 || elapsed >= targetDuration)) {
+          completing = true;
+          completeStartTime = now;
+          initialFromP = p;
+        }
       } else {
-        setProgress(100);
-        progressDoneRef.current = true;
-        checkDismiss();
+        const elapsed = now - completeStartTime;
+        const completeDuration = 400;
+        const t = Math.min(elapsed / completeDuration, 1);
+        const p = Math.round(initialFromP + (100 - initialFromP) * easeInOutCubic(t));
+        setProgress(p);
+
+        if (t >= 1) {
+          setProgress(100);
+          progressDoneRef.current = true;
+          checkDismiss();
+          return;
+        }
       }
+
+      rafRef.current = requestAnimationFrame(animate);
     };
 
     rafRef.current = requestAnimationFrame(animate);
@@ -91,27 +133,18 @@ export default function Preloader({ children }) {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, []);
+  }, [checkDismiss]);
 
-  const checkDismiss = useCallback(() => {
-    if (isPageLoaded && progressDoneRef.current && !showContent) {
-      // 400ms pause at 100% so the full white text shines before revealing content
-      const t = setTimeout(() => setShowContent(true), 400);
-      return () => clearTimeout(t);
-    }
-    return undefined;
-  }, [isPageLoaded, showContent]);
-
-  /* ── Wait for window.load + critical images ── */
+  /* ── Preload critical avatar image & wait for window.load ── */
   useEffect(() => {
-    const criticalImages = ['/images/photo3.jpeg'];
+    const avatarImg = profile?.profileImage || '/images/photo3.jpeg';
+    const criticalImages = [avatarImg];
     let loadTimer;
 
     const handleLoad = () => {
       loadTimer = setTimeout(() => {
         setIsPageLoaded(true);
-        checkDismiss();
-      }, 200);
+      }, 150);
     };
 
     if (document.readyState === 'complete') {
@@ -134,8 +167,7 @@ export default function Preloader({ children }) {
       if (document.readyState === 'complete') {
         loadTimer = setTimeout(() => {
           setIsPageLoaded(true);
-          checkDismiss();
-        }, 200);
+        }, 150);
       }
     });
 
@@ -143,18 +175,16 @@ export default function Preloader({ children }) {
       if (loadTimer) clearTimeout(loadTimer);
       window.removeEventListener('load', handleLoad);
     };
-  }, [checkDismiss]);
+  }, [profile?.profileImage]);
 
-  /* ── Safety timeout: never block longer than 8s ── */
+  /* ── Safety timeout: never block longer than 7s ── */
   useEffect(() => {
     const safetyTimer = setTimeout(() => {
       setIsPageLoaded(true);
-      setProgress(100);
-      progressDoneRef.current = true;
-      checkDismiss();
-    }, 8000);
+      isDataReadyRef.current = true;
+    }, 7000);
     return () => clearTimeout(safetyTimer);
-  }, [checkDismiss]);
+  }, []);
 
   return (
     <>
