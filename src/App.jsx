@@ -1,6 +1,7 @@
 import { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { PortfolioProvider } from './context/PortfolioContext';
+import Preloader from './components/Preloader';
 
 const Home = lazy(() => import('./pages/Home'));
 const ProjectDetails = lazy(() => import('./pages/ProjectDetails'));
@@ -15,13 +16,15 @@ const RouteFallback = () => (
 function App() {
   return (
     <PortfolioProvider>
-      <Suspense fallback={<RouteFallback />}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/project/:id" element={<ProjectDetails />} />
-          <Route path="/admin" element={<Admin />} />
-        </Routes>
-      </Suspense>
+      <Preloader>
+        <Suspense fallback={<RouteFallback />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/project/:id" element={<ProjectDetails />} />
+            <Route path="/admin" element={<Admin />} />
+          </Routes>
+        </Suspense>
+      </Preloader>
     </PortfolioProvider>
   );
 }
