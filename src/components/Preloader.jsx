@@ -2,19 +2,45 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /* ─────────────────────────────────────────
-   ease-out-cubic easing (matches Neoleaf)
+   ease-out-cubic easing
    ───────────────────────────────────────── */
 const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
 
 /* ─────────────────────────────────────────
-   Preloader — full-screen "loading..." overlay
-   Mimics neoleaf.bytetown.agency:
-   - Dark background (#151312 site dark)
-   - Lowercase "loading..." text
-   - Percentage counter with ease-out-cubic (2.5s)
-   - Gradient progress bar at top (orange → lime → red)
-   - Dismisses after window.load + critical images AND progress reaches 100%
-   - Content scales 0.85 → 1.0 as loader fades out
+   Build a smooth sinusoidal wave clip-path
+   200% of viewBox width for seamless loop
+   ───────────────────────────────────────── */
+function buildWavePath(viewBoxWidth, amplitude) {
+  const totalWidth = viewBoxWidth * 2;
+  const halfPeriod = viewBoxWidth / 8; // 4 full visible waves
+
+  let d = `M 0 ${amplitude}`;
+  d += ` Q ${halfPeriod / 2} 0 ${halfPeriod} ${amplitude}`;
+
+  for (let x = halfPeriod * 2; x <= totalWidth; x += halfPeriod) {
+    d += ` T ${x} ${amplitude}`;
+  }
+
+  d += ` V ${amplitude + 700} H 0 Z`;
+  return d;
+}
+
+/* ─── Constants ─── */
+const DISPLAY_TEXT = 'Shreyas';
+const VB_W = 800;
+const VB_H = 260;
+const FONT_SIZE = 200;
+const WAVE_AMP = 18;
+const WAVE_PATH = buildWavePath(VB_W, WAVE_AMP);
+
+/* ─────────────────────────────────────────
+   Preloader — Neoleaf-style liquid-fill letters
+   • Dark bg (#151312)
+   • Giant "Shreyas" in Poppins 900
+   • Bottom-to-top wave clip revealing white fill
+   • "loading...  XX %" bottom-right counter
+   • Top gradient accent bar
+   • Dismisses on window.load + progress 100%
    ───────────────────────────────────────── */
 export default function Preloader({ children }) {
   const [isPageLoaded, setIsPageLoaded] = useState(false);
@@ -23,7 +49,7 @@ export default function Preloader({ children }) {
   const rafRef = useRef(null);
   const progressDoneRef = useRef(false);
 
-  /* ── Progress animation: 0% → 100% over 2.5s with ease-out-cubic ── */
+  /* ── Progress: 0 → 100 over 2.5s, ease-out-cubic ── */
   useEffect(() => {
     const duration = 2500;
     const start = performance.now();
@@ -44,7 +70,6 @@ export default function Preloader({ children }) {
     };
 
     rafRef.current = requestAnimationFrame(animate);
-
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
@@ -52,10 +77,7 @@ export default function Preloader({ children }) {
 
   const checkDismiss = useCallback(() => {
     if (isPageLoaded && progressDoneRef.current && !showContent) {
-      // Small pause at 100% before fading out (premium feel)
-      const t = setTimeout(() => {
-        setShowContent(true);
-      }, 400);
+      const t = setTimeout(() => setShowContent(true), 350);
       return () => clearTimeout(t);
     }
     return undefined;
@@ -63,10 +85,7 @@ export default function Preloader({ children }) {
 
   /* ── Wait for window.load + critical images ── */
   useEffect(() => {
-    const criticalImages = [
-      '/images/photo3.jpeg', // Hero avatar
-    ];
-
+    const criticalImages = ['/images/photo3.jpeg'];
     let loadTimer;
 
     const handleLoad = () => {
@@ -82,15 +101,15 @@ export default function Preloader({ children }) {
       window.addEventListener('load', handleLoad);
     }
 
-    // Preload critical images so they're cached by the time content reveals
-    const preloadPromises = criticalImages.map((src) => {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = resolve;
-        img.onerror = resolve;
-        img.src = src;
-      });
-    });
+    const preloadPromises = criticalImages.map(
+      (src) =>
+        new Promise((resolve) => {
+          const img = new Image();
+          img.onload = resolve;
+          img.onerror = resolve;
+          img.src = src;
+        })
+    );
 
     Promise.all(preloadPromises).then(() => {
       if (document.readyState === 'complete') {
@@ -107,7 +126,7 @@ export default function Preloader({ children }) {
     };
   }, [checkDismiss]);
 
-  /* ── Safety timeout: never show loader longer than 8s ── */
+  /* ── Safety timeout: never show loader > 8s ── */
   useEffect(() => {
     const safetyTimer = setTimeout(() => {
       setIsPageLoaded(true);
@@ -117,6 +136,9 @@ export default function Preloader({ children }) {
     }, 8000);
     return () => clearTimeout(safetyTimer);
   }, [checkDismiss]);
+
+  /* ── Wave Y: progress 0→100 maps to 260→-10 ── */
+  const waveY = 260 - (progress / 100) * 270;
 
   return (
     <>
@@ -130,78 +152,96 @@ export default function Preloader({ children }) {
               transition: { duration: 0.7, ease: 'easeOut' },
             }}
             className="
-              fixed
-              inset-0
-              z-[9999]
-              bg-[#151312]
-              flex
-              flex-col
-              items-center
-              justify-center
+              fixed inset-0 z-[9999] bg-[#151312]
+              flex flex-col items-center justify-center
               text-white
-              transition-colors
-              duration-700
             "
           >
-            {/* ── Top progress bar ── */}
-            <div className="
-              absolute
-              top-0
-              left-0
-              w-full
-              h-[2px]
-              bg-gradient-to-r
-              from-[#F46C38]
-              via-[#C5FF41]
-              to-[#FF2600]
-              z-[10000]
-            ">
-              <motion.div
-                className="h-full bg-white"
-                animate={{
-                  width: `${progress}%`,
-                }}
-                transition={{
-                  duration: 2.5,
-                  ease: 'easeOut',
-                }}
-              />
-            </div>
+            {/* ── Top gradient accent bar ── */}
+            <div
+              className="absolute top-0 left-0 h-[2px] z-[10000]"
+              style={{
+                width: `${progress}%`,
+                background:
+                  'linear-gradient(to right, #F46C38, #C5FF41, #FF2600)',
+                transition: 'width 0.05s linear',
+              }}
+            />
 
-            {/* ── Center content ── */}
-            <div className="flex flex-col items-center justify-center gap-4 z-[10000]">
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
+            {/* ── Liquid wave text container ── */}
+            <div className="relative w-[94vw] max-w-[900px] flex flex-col items-end">
+              <svg
+                viewBox={`0 0 ${VB_W} ${VB_H}`}
+                className="w-full select-none"
+                style={{ overflow: 'visible' }}
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
               >
-                <span className="
-                  text-[16px]
-                  sm:text-[18px]
-                  font-normal
-                  tracking-widest
-                  text-white
-                  opacity-80
-                  select-none
-                ">
+                <defs>
+                  {/* Wave clip-path — rises from bottom to top */}
+                  <clipPath
+                    id="liquid-wave-clip"
+                    clipPathUnits="userSpaceOnUse"
+                  >
+                    <g transform={`translate(0, ${waveY})`}>
+                      <g>
+                        <animateTransform
+                          attributeName="transform"
+                          type="translate"
+                          values={`0 0; -${VB_W} 0`}
+                          dur="3s"
+                          repeatCount="indefinite"
+                        />
+                        <path d={WAVE_PATH} />
+                      </g>
+                    </g>
+                  </clipPath>
+                </defs>
+
+                {/* Layer 1 — muted grey silhouette (always visible) */}
+                <text
+                  x={VB_W / 2}
+                  y="195"
+                  textAnchor="middle"
+                  fontSize={FONT_SIZE}
+                  fontFamily="'Poppins', sans-serif"
+                  fontWeight="900"
+                  fill="rgba(255,255,255,0.22)"
+                  letterSpacing="-6"
+                  style={{ userSelect: 'none' }}
+                >
+                  {DISPLAY_TEXT}
+                </text>
+
+                {/* Layer 2 — white fill, clipped by rising wave */}
+                <text
+                  x={VB_W / 2}
+                  y="195"
+                  textAnchor="middle"
+                  fontSize={FONT_SIZE}
+                  fontFamily="'Poppins', sans-serif"
+                  fontWeight="900"
+                  fill="#FFFFFF"
+                  letterSpacing="-6"
+                  clipPath="url(#liquid-wave-clip)"
+                  style={{ userSelect: 'none' }}
+                >
+                  {DISPLAY_TEXT}
+                </text>
+              </svg>
+
+              {/* ── Bottom-right counter: "loading...  XX %" ── */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.7 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                className="flex items-center gap-3 mt-2 mr-1 select-none"
+              >
+                <span className="text-[13px] sm:text-[15px] text-white/70 tracking-widest font-normal lowercase">
                   loading...
                 </span>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.15, ease: 'easeOut' }}
-              >
-                <span className="
-                  text-[24px]
-                  sm:text-[32px]
-                  font-bold
-                  tracking-tight
-                  text-white
-                  select-none
-                ">
-                  {progress}%
+                <span className="text-[13px] sm:text-[15px] text-white/70 font-medium tabular-nums tracking-wide">
+                  {progress} %
                 </span>
               </motion.div>
             </div>

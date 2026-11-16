@@ -19,6 +19,10 @@ const edgeTypes = {
   curved: CurvedEdge
 };
 
+/* 
+   ReactFlow v11 requires explicit height/width on the container
+   for zustand hooks (useNodesState, useEdgesState, addEdge) to work.
+*/
 export default function CompetencyMap({ certificates }) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -97,6 +101,7 @@ export default function CompetencyMap({ certificates }) {
           elementsSelectable={true}
           nodesConnectable={true}
           connectionMode="loose"
+          style={{ height: "100%", width: "100%" }}
         >
 
           <Background
