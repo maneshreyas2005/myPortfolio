@@ -9,6 +9,7 @@ import {
   fetchCommunityData,
   fetchCertificatesData
 } from '../dataFetch';
+import { SECTION_ORDER } from '../config/sections';
 
 const PortfolioContext = createContext(null);
 
@@ -23,7 +24,8 @@ export const PortfolioProvider = ({ children }) => {
     github: resumeData.github,
     linkedin: resumeData.linkedin,
     location: resumeData.location,
-    profileImage: '/images/photo3.jpeg'
+    profileImage: '/images/photo3.jpeg',
+    visibleSections: [...SECTION_ORDER]
   });
   const [skills, setSkills] = useState(resumeData.skills);
   const [experience, setExperience] = useState(resumeData.experience);

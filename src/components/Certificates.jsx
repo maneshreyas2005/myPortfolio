@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { usePortfolio } from '../context/PortfolioContext';
 import { Award, X, Maximize2, Calendar, Tag, ExternalLink, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import OptimizedImage from './OptimizedImage';
+import CompetencyMap from './competency-map/CompetencyMap';
 
 export default function Certificates() {
   const { certificates } = usePortfolio();
@@ -73,6 +74,17 @@ export default function Certificates() {
               })}
             </div>
           )}
+        </div>
+
+        {/* Interactive Competency Map */}
+        <div className="mt-12 sm:mt-16 mb-8 sm:mb-12">
+          <div className="flex items-center justify-between mb-6 sm:mb-8">
+            <h2 className="text-lg sm:text-xl font-black mb-1">Competency Map</h2>
+            <p className="text-xs text-white/40">
+              Click a node to filter related certifications below
+            </p>
+          </div>
+          <CompetencyMap certificates={items} />
         </div>
 
         {/* Pinterest-Style Masonry Grid */}

@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import Hero, { HeroCard } from '../components/Hero';
 import Footer from '../components/Footer';
 import { usePortfolio } from '../context/PortfolioContext';
+import { SECTION_ORDER } from '../config/sections';
 
 // Heavy sections loaded lazily (below the fold)
 const Projects = lazy(() => import('../components/Projects'));
@@ -18,11 +19,21 @@ const SectionFallback = ({ label }) => (
   </div>
 );
 
+const SECTION_COMPONENTS = {
+  skills: Skills,
+  projects: Projects,
+  experience: Experience,
+  certificates: Certificates,
+  community: Community,
+  education: Education
+};
+
 function Home() {
     const containerRef = useRef(null);
     const cardRef = useRef(null);
     const [isMobile, setIsMobile] = useState(false);
-    usePortfolio();
+    const { profile } = usePortfolio();
+    const visibleSections = profile?.visibleSections || SECTION_ORDER;
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 1280);
@@ -125,24 +136,15 @@ function Home() {
                     {!isMobile && <div className="hidden xl:block xl:w-1/4 shrink-0" />}
 
                     <div className="w-full xl:w-3/4 pb-20 px-4 sm:px-6 md:px-12 xl:px-20">
-                        <Suspense fallback={<SectionFallback label="skills" />}>
-                            <Skills />
-                        </Suspense>
-                        <Suspense fallback={<SectionFallback label="experience" />}>
-                            <Experience />
-                        </Suspense>
-                        <Suspense fallback={<SectionFallback label="projects" />}>
-                            <Projects />
-                        </Suspense>
-                        <Suspense fallback={<SectionFallback label="certificates" />}>
-                            <Certificates />
-                        </Suspense>
-                        <Suspense fallback={<SectionFallback label="community" />}>
-                            <Community />
-                        </Suspense>
-                        <Suspense fallback={<SectionFallback label="education" />}>
-                            <Education />
-                        </Suspense>
+                        {SECTION_ORDER.map((sectionId) => {
+                            if (!visibleSections.includes(sectionId)) return null;
+                            const SectionComp = SECTION_COMPONENTS[sectionId];
+                            return (
+                                <Suspense key={sectionId} fallback={<SectionFallback label={sectionId} />}>
+                                    <SectionComp />
+                                </Suspense>
+                            );
+                        })}
                         <Footer />
                     </div>
                 </div>

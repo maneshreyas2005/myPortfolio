@@ -20,7 +20,12 @@ const seedData = {
     github: "https://github.com/maneshreyas2005",
     linkedin: "https://www.linkedin.com/in/shreyas-mane-23s0204s12/",
     location: "Mumbai, India",
-    profileImage: "/images/photo3.jpeg"
+    profileImage: "/images/photo3.jpeg",
+    visibleSections: ["skills", "projects", "experience", "certificates", "community", "education"],
+    competencyMapConfig: {
+      layout: "hierarchical",
+      showEdgeLabels: false
+    }
   },
   skills: [
     { category: "Languages", items: ["Java", "Python", "JavaScript", "SQL"], accent: "text-accent-orange" },

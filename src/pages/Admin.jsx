@@ -4,7 +4,7 @@ import {
   User, Code, Briefcase, GraduationCap, FolderGit2, Download, Upload,
   LogOut, Plus, Trash2, Edit3, Save, CheckCircle2, AlertCircle, Eye,
   RefreshCw, Lock, Sparkles, X, ChevronRight, Users, Camera, Award,
-  BarChart2
+  BarChart2, Monitor
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePortfolio } from '../context/PortfolioContext';
@@ -33,6 +33,8 @@ import {
   deleteCertificateItemApi
 } from '../dataFetch';
 import AnalyticsDashboard from '../components/analytics/AnalyticsDashboard';
+import ToggleSwitch from '../components/admin/ToggleSwitch';
+import { SECTIONS } from '../config/sections';
 
 export default function Admin() {
   const {
@@ -741,6 +743,35 @@ export default function Admin() {
                     <span className="text-3xl font-black text-blue-400">{education?.length || 0}</span>
                     <p className="text-xs text-white/40 uppercase font-bold tracking-wider mt-1">Education</p>
                   </div>
+                </div>
+              </div>
+
+              {/* Section Visibility */}
+              <div className="mt-8 sm:mt-10 p-6 bg-[#161413] border border-white/10 rounded-3xl">
+                <div className="flex items-center justify-between mb-6 sm:mb-8">
+                  <div>
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <Monitor className="text-accent-lime" size={20} />
+                      Section Visibility
+                    </h3>
+                    <p className="text-xs text-white/40 mt-1">
+                      Toggle which sections are visible on your portfolio website.
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {SECTIONS.map((section) => (
+                    <ToggleSwitch
+                      key={section.id}
+                      section={section}
+                      onToggle={(sectionId, isVisible) => {
+                        showToast(
+                          `${section.label} ${isVisible ? 'shown' : 'hidden'} on portfolio`,
+                          'success'
+                        );
+                      }}
+                    />
+                  ))}
                 </div>
               </div>
 
