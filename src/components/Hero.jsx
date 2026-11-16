@@ -169,18 +169,30 @@ export const HeroCard = ({ className = "" }) => {
 
                         <div className="flex flex-wrap justify-center items-center gap-2.5 sm:gap-3 w-full">
                             <a href={data.linkedin} target="_blank" rel="noreferrer" title="LinkedIn"
+                                data-analytics="true"
+                                data-analytics-id="social-linkedin"
+                                data-analytics-type="social_link"
                                 className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white shadow-sm hover:bg-[#F46C38] hover:text-white text-[#151312] transition-all duration-300">
                                 <Linkedin className="w-4 h-4 sm:w-5 sm:h-5" />
                             </a>
                             <a href={data.github} target="_blank" rel="noreferrer" title="GitHub"
+                                data-analytics="true"
+                                data-analytics-id="social-github"
+                                data-analytics-type="social_link"
                                 className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white shadow-sm hover:bg-[#F46C38] hover:text-white text-[#151312] transition-all duration-300">
                                 <Github className="w-4 h-4 sm:w-5 sm:h-5" />
                             </a>
                             <a href={`mailto:${data.email}`} title="Email"
+                                data-analytics="true"
+                                data-analytics-id="contact-email"
+                                data-analytics-type="contact_link"
                                 className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl bg-white shadow-sm hover:bg-[#F46C38] hover:text-white text-[#151312] transition-all duration-300">
                                 <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
                             </a>
                             <a href={`mailto:${data.email}`}
+                                data-analytics="true"
+                                data-analytics-id="contact-letstalk"
+                                data-analytics-type="contact_link"
                                 className="px-5 py-2.5 sm:px-6 sm:py-3 bg-[#151312] text-white rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold hover:bg-[#F46C38] transition-all duration-300 whitespace-nowrap">
                                 Let's Talk
                             </a>

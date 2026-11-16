@@ -17,6 +17,8 @@ const exportRoutes = require('./routes/export');
 const authRoutes = require('./routes/auth');
 const communityRoutes = require('./routes/community');
 const certificateRoutes = require('./routes/certificates');
+const analyticsRoutes = require('./routes/analytics');
+const { startAggregationJob } = require('./jobs/analyticsAggregation');
 
 const app = express();
 
@@ -25,6 +27,9 @@ app.set('trust proxy', 1);
 
 // Connect to MongoDB Atlas
 connectDB();
+
+// Start daily analytics aggregation job
+startAggregationJob();
 
 // 1. Security HTTP Headers with Helmet
 // Allow cross-origin resource policy so images and uploads can load on frontend
@@ -81,6 +86,16 @@ const generalApiLimiter = rateLimit({
 app.use('/api/auth/login', authLimiter);
 app.use('/api', generalApiLimiter);
 
+// Lenient rate limiter for public analytics tracking (1000 req/15min per IP)
+const trackingLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // Limit each IP to 1000 tracking requests per 15 minutes
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use('/api/analytics/track', trackingLimiter);
+app.use('/api/analytics/track/batch', trackingLimiter);
+
 // 4. Request Body Parsing & NoSQL Injection Sanitization
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -101,6 +116,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/education', educationRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/certificates', certificateRoutes);
+app.use('/api/analytics', analyticsRoutes);
 app.use('/api', exportRoutes);
 
 // Secure Health check route (does not expose internal endpoints)

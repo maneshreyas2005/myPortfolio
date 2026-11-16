@@ -49,6 +49,9 @@ const ProjectRow = ({ project, index }) => {
                         e.stopPropagation();
                         navigate(`/project/${project.id || project._id}`);
                     }}
+                    data-analytics="true"
+                    data-analytics-id={`project-${project.id || project._id}`}
+                    data-analytics-type="project_card"
                     animate={{
                         rotate: hovered ? 0 : -45,
                         backgroundColor: hovered ? '#F46C38' : 'transparent',

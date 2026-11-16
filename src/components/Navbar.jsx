@@ -22,6 +22,9 @@ const Navbar = () => {
                     <li key={index}>
                         <a
                             href={item.href}
+                            data-analytics="true"
+                            data-analytics-id={`nav-${item.label.toLowerCase()}`}
+                            data-analytics-type="nav_link"
                             className="text-white/70 hover:text-accent-orange transition-colors duration-300 flex items-center gap-2 p-1 sm:p-0 group"
                             title={item.label}
                         >

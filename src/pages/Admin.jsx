@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   User, Code, Briefcase, GraduationCap, FolderGit2, Download, Upload,
   LogOut, Plus, Trash2, Edit3, Save, CheckCircle2, AlertCircle, Eye,
-  RefreshCw, Lock, Sparkles, X, ChevronRight, Users, Camera, Award
+  RefreshCw, Lock, Sparkles, X, ChevronRight, Users, Camera, Award,
+  BarChart2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePortfolio } from '../context/PortfolioContext';
@@ -31,6 +32,7 @@ import {
   updateCertificateItemApi,
   deleteCertificateItemApi
 } from '../dataFetch';
+import AnalyticsDashboard from '../components/analytics/AnalyticsDashboard';
 
 export default function Admin() {
   const {
@@ -686,6 +688,7 @@ export default function Admin() {
             { id: 'certificates', label: 'Certificates & Achievements', icon: <Award size={18} /> },
             { id: 'community', label: 'Positions of Responsibility', icon: <Users size={18} /> },
             { id: 'education', label: 'Education', icon: <GraduationCap size={18} /> },
+            { id: 'analytics', label: 'Analytics', icon: <BarChart2 size={18} /> },
             { id: 'backup', label: 'Backup & JSON', icon: <Download size={18} /> }
           ].map((tab) => (
             <button
@@ -1380,6 +1383,13 @@ export default function Admin() {
                   </div>
                 ))}
               </div>
+            </motion.div>
+          )}
+
+          {/* TAB: ANALYTICS */}
+          {activeTab === 'analytics' && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+              <AnalyticsDashboard token={adminToken} />
             </motion.div>
           )}
 

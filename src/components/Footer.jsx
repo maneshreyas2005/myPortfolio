@@ -19,10 +19,16 @@ const Footer = () => {
                             Let's create something <span className="text-accent-orange">extraordinary</span>.
                         </h2>
                         <div className="flex flex-col sm:flex-row flex-wrap gap-2.5 sm:gap-6 md:gap-8 justify-center md:justify-start items-center">
-                            <a href={`mailto:${data.email}`} className="text-sm sm:text-xl md:text-2xl font-bold hover:text-accent-orange transition-colors break-all sm:break-normal">
+                            <a href={`mailto:${data.email}`} className="text-sm sm:text-xl md:text-2xl font-bold hover:text-accent-orange transition-colors break-all sm:break-normal"
+                                data-analytics="true"
+                                data-analytics-id="footer-email"
+                                data-analytics-type="contact_link">
                                 {data.email}
                             </a>
-                            <a href={`tel:${data.phone}`} className="text-sm sm:text-xl md:text-2xl font-bold hover:text-accent-orange transition-colors">
+                            <a href={`tel:${data.phone}`} className="text-sm sm:text-xl md:text-2xl font-bold hover:text-accent-orange transition-colors"
+                                data-analytics="true"
+                                data-analytics-id="footer-phone"
+                                data-analytics-type="contact_link">
                                 {data.phone}
                             </a>
                         </div>
@@ -43,8 +49,18 @@ const Footer = () => {
                     <p>© {new Date().getFullYear()} {data.name}. All rights reserved.</p>
 
                     <div className="flex gap-6 sm:gap-8">
-                        <a href={data.linkedin} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
-                        <a href={data.github} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub</a>
+                        <a href={data.linkedin} target="_blank" rel="noreferrer" className="hover:text-white transition-colors"
+                            data-analytics="true"
+                            data-analytics-id="footer-linkedin"
+                            data-analytics-type="social_link">
+                            LinkedIn
+                        </a>
+                        <a href={data.github} target="_blank" rel="noreferrer" className="hover:text-white transition-colors"
+                            data-analytics="true"
+                            data-analytics-id="footer-github"
+                            data-analytics-type="social_link">
+                            GitHub
+                        </a>
                     </div>
 
                     <p>Built with React & Tailwind</p>

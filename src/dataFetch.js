@@ -456,3 +456,56 @@ export const deleteCertificateItemApi = async (id, token) => {
 };
 
 
+/* ─────────────────────────────────────────
+   Analytics API (private, admin only)
+   ───────────────────────────────────────── */
+
+export const fetchAnalyticsSummary = async (token, range = '7d') => {
+  const res = await fetch(`${API_BASE}/analytics/summary?range=${range}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error(`Analytics summary failed with status ${res.status}`);
+  return await res.json();
+};
+
+export const fetchAnalyticsTimeseries = async (token, range = '30d') => {
+  const res = await fetch(`${API_BASE}/analytics/timeseries?range=${range}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error(`Analytics timeseries failed with status ${res.status}`);
+  return await res.json();
+};
+
+export const fetchAnalyticsSections = async (token, range = '7d') => {
+  const res = await fetch(`${API_BASE}/analytics/sections?range=${range}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error(`Analytics sections failed with status ${res.status}`);
+  return await res.json();
+};
+
+export const fetchAnalyticsPages = async (token, range = '7d') => {
+  const res = await fetch(`${API_BASE}/analytics/pages?range=${range}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error(`Analytics pages failed with status ${res.status}`);
+  return await res.json();
+};
+
+export const fetchAnalyticsVisitors = async (token, range = '30d') => {
+  const res = await fetch(`${API_BASE}/analytics/visitors?range=${range}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error(`Analytics visitors failed with status ${res.status}`);
+  return await res.json();
+};
+
+export const fetchAnalyticsRealtime = async (token) => {
+  const res = await fetch(`${API_BASE}/analytics/realtime`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error(`Analytics realtime failed with status ${res.status}`);
+  return await res.json();
+};
+
+
