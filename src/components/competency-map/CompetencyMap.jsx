@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ReactFlow, Controls, Background, MiniMap, useNodesState, useEdgesState, addEdge } from 'reactflow';
+import { ReactFlow, ReactFlowProvider, Controls, Background, MiniMap, useNodesState, useEdgesState, addEdge } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useCompetencyMapData } from './useCompetencyMapData';
 import SkillCategoryNode from './nodes/SkillCategoryNode';
@@ -24,6 +24,14 @@ const edgeTypes = {
    for zustand hooks (useNodesState, useEdgesState, addEdge) to work.
 */
 export default function CompetencyMap({ certificates }) {
+  return (
+    <ReactFlowProvider>
+      <CompetencyMapInner certificates={certificates} />
+    </ReactFlowProvider>
+  );
+}
+
+function CompetencyMapInner({ certificates }) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [layout, setLayout] = useState('hierarchical');
