@@ -21,6 +21,8 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: {
             vendor: ['react', 'react-dom', 'react-router-dom'],
+            animations: ['framer-motion', 'gsap', 'gsap/ScrollTrigger'],
+            icons: ['lucide-react'],
           },
         },
       },

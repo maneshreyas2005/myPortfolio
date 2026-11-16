@@ -7,6 +7,7 @@ const Experience = require('../models/experienceModel');
 const Project = require('../models/projectModel');
 const Education = require('../models/educationModel');
 const Community = require('../models/communityModel');
+const Certificate = require('../models/certificateModel');
 const { authenticate } = require('../middleware/auth');
 
 // @route   GET /api/export
@@ -14,13 +15,14 @@ const { authenticate } = require('../middleware/auth');
 // @access  Private
 router.get('/export', authenticate, async (req, res) => {
   try {
-    const [profile, skills, experience, projects, education, community] = await Promise.all([
+    const [profile, skills, experience, projects, education, community, certificates] = await Promise.all([
       Profile.find(),
       Skill.find(),
       Experience.find(),
       Project.find(),
       Education.find(),
-      Community.find()
+      Community.find(),
+      Certificate.find()
     ]);
 
     const exportData = {
@@ -30,6 +32,7 @@ router.get('/export', authenticate, async (req, res) => {
       projects,
       education,
       community,
+      certificates,
       exportedAt: new Date().toISOString()
     };
 
@@ -46,7 +49,7 @@ router.get('/export', authenticate, async (req, res) => {
 // @access  Private
 router.post('/import', authenticate, async (req, res) => {
   try {
-    const { profile, skills, experience, projects, education, community } = req.body;
+    const { profile, skills, experience, projects, education, community, certificates } = req.body;
     
     if (!profile || !skills || !experience || !projects || !education) {
       return res.status(400).json({ error: 'Invalid import data - missing required collections' });
@@ -59,7 +62,8 @@ router.post('/import', authenticate, async (req, res) => {
       Experience.find(),
       Project.find(),
       Education.find(),
-      Community.find()
+      Community.find(),
+      Certificate.find()
     ]);
     
     const backupData = {
@@ -69,6 +73,7 @@ router.post('/import', authenticate, async (req, res) => {
       projects: backup[3],
       education: backup[4],
       community: backup[5],
+      certificates: backup[6],
       backedUpAt: new Date().toISOString()
     };
 
@@ -79,7 +84,8 @@ router.post('/import', authenticate, async (req, res) => {
       Experience.deleteMany({}),
       Project.deleteMany({}),
       Education.deleteMany({}),
-      Community.deleteMany({})
+      Community.deleteMany({}),
+      Certificate.deleteMany({})
     ]);
 
     // Import new data
@@ -93,6 +99,9 @@ router.post('/import', authenticate, async (req, res) => {
 
     if (community && Array.isArray(community) && community.length > 0) {
       importPromises.push(Community.insertMany(community));
+    }
+    if (certificates && Array.isArray(certificates) && certificates.length > 0) {
+      importPromises.push(Certificate.insertMany(certificates));
     }
 
     await Promise.all(importPromises);

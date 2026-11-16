@@ -6,7 +6,8 @@ import {
   fetchExperienceData,
   fetchProjectsData,
   fetchEducationData,
-  fetchCommunityData
+  fetchCommunityData,
+  fetchCertificatesData
 } from '../dataFetch';
 
 const PortfolioContext = createContext(null);
@@ -29,6 +30,7 @@ export const PortfolioProvider = ({ children }) => {
   const [projects, setProjects] = useState(resumeData.projects);
   const [education, setEducation] = useState(resumeData.education);
   const [community, setCommunity] = useState([]);
+  const [certificates, setCertificates] = useState(resumeData.certificates || []);
   const [loading, setLoading] = useState(true);
 
   // Admin authentication state
@@ -49,32 +51,33 @@ export const PortfolioProvider = ({ children }) => {
     setAdminToken(null);
   };
 
-  const refreshData = useCallback(async () => {
-    try {
-      const [p, s, exp, prj, edu, com] = await Promise.allSettled([
-        fetchProfileData(),
-        fetchSkillsData(),
-        fetchExperienceData(),
-        fetchProjectsData(),
-        fetchEducationData(),
-        fetchCommunityData()
-      ]);
+  const refreshData = useCallback(() => {
+    let mounted = true;
 
-      if (p.status === 'fulfilled' && p.value) setProfile(p.value);
-      if (s.status === 'fulfilled' && s.value) setSkills(s.value);
-      if (exp.status === 'fulfilled' && exp.value) setExperience(exp.value);
-      if (prj.status === 'fulfilled' && prj.value) setProjects(prj.value);
-      if (edu.status === 'fulfilled' && edu.value) setEducation(edu.value);
-      if (com.status === 'fulfilled' && com.value) setCommunity(com.value);
-    } catch (err) {
-      console.warn('Portfolio refresh warning:', err);
-    } finally {
-      setLoading(false);
-    }
+    // Progressive hydration: fire all requests immediately, update state as each resolves.
+    // Static fallback (already in state) is shown instantly; API data replaces it progressively.
+    const fetches = {
+      profile: fetchProfileData().then((data) => { if (mounted) setProfile(data); }),
+      skills: fetchSkillsData().then((data) => { if (mounted) setSkills(data); }),
+      experience: fetchExperienceData().then((data) => { if (mounted) setExperience(data); }),
+      projects: fetchProjectsData().then((data) => { if (mounted) setProjects(data); }),
+      education: fetchEducationData().then((data) => { if (mounted) setEducation(data); }),
+      community: fetchCommunityData().then((data) => { if (mounted) setCommunity(data); }),
+      certificates: fetchCertificatesData().then((data) => { if (mounted) setCertificates(data); }),
+    };
+
+    Promise.all(Object.values(fetches)).finally(() => {
+      if (mounted) setLoading(false);
+    });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   useEffect(() => {
-    refreshData();
+    const cleanup = refreshData();
+    return cleanup;
   }, [refreshData]);
 
   return (
@@ -86,6 +89,7 @@ export const PortfolioProvider = ({ children }) => {
         projects,
         education,
         community,
+        certificates,
         loading,
         refreshData,
         adminToken,

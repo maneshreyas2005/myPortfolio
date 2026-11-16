@@ -1,23 +1,28 @@
-import { useLayoutEffect, useRef, useState, useEffect } from 'react';
+import { lazy, Suspense, useLayoutEffect, useRef, useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Hero, { HeroCard } from '../components/Hero';
-import Projects from '../components/Projects';
-import Experience from '../components/Experience';
-import Skills from '../components/Skills';
-import Community from '../components/Community';
-import Education from '../components/Education';
 import Footer from '../components/Footer';
 import { usePortfolio } from '../context/PortfolioContext';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-gsap.registerPlugin(ScrollTrigger);
+// Heavy sections loaded lazily (below the fold)
+const Projects = lazy(() => import('../components/Projects'));
+const Experience = lazy(() => import('../components/Experience'));
+const Skills = lazy(() => import('../components/Skills'));
+const Certificates = lazy(() => import('../components/Certificates'));
+const Community = lazy(() => import('../components/Community'));
+const Education = lazy(() => import('../components/Education'));
+
+const SectionFallback = ({ label }) => (
+  <div className="h-64 flex items-center justify-center text-white/30 animate-pulse">
+    Loading {label}…
+  </div>
+);
 
 function Home() {
     const containerRef = useRef(null);
     const cardRef = useRef(null);
     const [isMobile, setIsMobile] = useState(false);
-    const { profile, projects, experience, community } = usePortfolio();
+    usePortfolio();
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 1280);
@@ -26,60 +31,71 @@ function Home() {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Refresh ScrollTrigger positions whenever dynamic data loads or layout shifts
+    // Defer GSAP animation initialization until after first paint
     useEffect(() => {
-        const timer = setTimeout(() => {
-            ScrollTrigger.refresh();
-        }, 200);
-        return () => clearTimeout(timer);
-    }, [profile, projects, experience, community]);
+        let timer;
+        const initAnimations = async () => {
+            const [gsapModule, ScrollTriggerModule] = await Promise.all([
+                import('gsap'),
+                import('gsap/ScrollTrigger'),
+            ]);
+            const gsap = gsapModule.default;
+            const ScrollTrigger = ScrollTriggerModule.default;
+            gsap.registerPlugin(ScrollTrigger);
+
+            const refreshTimer = setTimeout(() => {
+                ScrollTrigger.refresh();
+            }, 200);
+            timer = refreshTimer;
+        };
+
+        timer = setTimeout(initAnimations, 0);
+        return () => {
+            clearTimeout(timer);
+        };
+    }, []);
 
     useLayoutEffect(() => {
         if (isMobile || !cardRef.current) return;
 
-        const ctx = gsap.context(() => {
-            const calculateLayout = () => {
-                const w = window.innerWidth;
-                const targetWidth = Math.min(360, Math.max(300, w * 0.22));
-                // Ensure left edge is at least 32px or 2.5vw from viewport left
-                const targetLeft = Math.max(32, w * 0.025);
-                const targetCenter = targetLeft + targetWidth / 2;
-                const initialCenter = w / 2;
-                const targetX = targetCenter - initialCenter;
-                return { targetWidth, targetX };
-            };
+        import('gsap').then(({ default: gsap }) => {
+            const ctx = gsap.context(() => {
+                const calculateLayout = () => {
+                    const w = window.innerWidth;
+                    const targetWidth = Math.min(360, Math.max(300, w * 0.22));
+                    // Ensure left edge is at least 32px or 2.5vw from viewport left
+                    const targetLeft = Math.max(32, w * 0.025);
+                    const targetCenter = targetLeft + targetWidth / 2;
+                    const initialCenter = w / 2;
+                    const targetX = targetCenter - initialCenter;
+                    return { targetWidth, targetX };
+                };
 
-            gsap.fromTo(
-                cardRef.current,
-                {
-                    x: 0,
-                    y: 40,
-                    width: Math.min(700, window.innerWidth * 0.9),
-                    height: 650,
-                    opacity: 1,
-                    '--card-image-size': '280px',
-                    immediateRender: true
-                },
-                {
-                    x: () => calculateLayout().targetX,
-                    y: 0,
-                    width: () => calculateLayout().targetWidth,
-                    height: '80vh',
-                    opacity: 1,
-                    ease: 'power2.inOut',
-                    '--card-image-size': '180px',
-                    scrollTrigger: {
-                        trigger: containerRef.current,
-                        start: 'top top',
-                        end: '800px',
-                        scrub: 1,
-                        invalidateOnRefresh: true,
+                gsap.fromTo(
+                    cardRef.current,
+                    {
+                        x: 0,
+                        y: 40,
+                        width: Math.min(700, window.innerWidth * 0.9),
+                        height: 650,
+                        opacity: 1,
+                        '--card-image-size': '280px',
+                        immediateRender: true
+                    },
+                    {
+                        x: () => calculateLayout().targetX,
+                        y: 0,
+                        width: () => calculateLayout().targetWidth,
+                        height: '80vh',
+                        opacity: 1,
+                        ease: 'power2.inOut',
+                        '--card-image-size': '180px',
                     }
-                }
-            );
-        }, containerRef);
+                );
+            }, containerRef);
 
-        return () => ctx.revert();
+            return () => ctx.revert();
+        });
     }, [isMobile]);
 
     return (
@@ -109,11 +125,24 @@ function Home() {
                     {!isMobile && <div className="hidden xl:block xl:w-1/4 shrink-0" />}
 
                     <div className="w-full xl:w-3/4 pb-20 px-4 sm:px-6 md:px-12 xl:px-20">
-                        <Skills />
-                        <Experience />
-                        <Projects />
-                        <Community />
-                        <Education />
+                        <Suspense fallback={<SectionFallback label="skills" />}>
+                            <Skills />
+                        </Suspense>
+                        <Suspense fallback={<SectionFallback label="experience" />}>
+                            <Experience />
+                        </Suspense>
+                        <Suspense fallback={<SectionFallback label="projects" />}>
+                            <Projects />
+                        </Suspense>
+                        <Suspense fallback={<SectionFallback label="certificates" />}>
+                            <Certificates />
+                        </Suspense>
+                        <Suspense fallback={<SectionFallback label="community" />}>
+                            <Community />
+                        </Suspense>
+                        <Suspense fallback={<SectionFallback label="education" />}>
+                            <Education />
+                        </Suspense>
                         <Footer />
                     </div>
                 </div>

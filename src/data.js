@@ -162,5 +162,52 @@ export const resumeData = {
             period: "2021 - 2022",
             grade: "Percentage: 91.40%"
         }
+    ],
+    certificates: [
+        {
+            _id: "cert-1",
+            title: "National Hackathon Finalist",
+            issuer: "Smart India Hackathon",
+            description: "Built and pitched an AI-driven automated decision-support system under 36 hours of rigorous competitive evaluation.",
+            image: "/images/articles/featured-judge.jpg",
+            tag: "Hackathon",
+            date: "2025",
+            credentialUrl: "https://github.com/maneshreyas2005",
+            sortOrder: 1
+        },
+        {
+            _id: "cert-2",
+            title: "Full Stack Web Developer Certification",
+            issuer: "Meta / Coursera",
+            description: "Rigorous certification covering advanced React, Node.js microservices, REST APIs, and database modeling.",
+            image: "/images/photo3.jpeg",
+            tag: "Certification",
+            date: "2025",
+            credentialUrl: "https://linkedin.com/in/shreyas-mane-23s0204s12/",
+            sortOrder: 2
+        },
+        {
+            _id: "cert-3",
+            title: "Postman API Fundamentals Student Expert",
+            issuer: "Postman",
+            description: "Demonstrated deep proficiency in RESTful API development, test automation, mocking, and API documentation workflows.",
+            image: "/images/articles/network-tab.jpg",
+            tag: "Certification",
+            date: "2025",
+            credentialUrl: "https://badgr.com",
+            sortOrder: 3
+        },
+        {
+            _id: "cert-4",
+            title: "Technical Excellence & Innovation Honor",
+            issuer: "VPPCOE IT Department",
+            description: "Recognized for high-impact contributions to campus digital infrastructure and leading technical portal initiatives.",
+            image: "/images/photo3.jpeg",
+            tag: "Honor",
+            date: "2024",
+            credentialUrl: "",
+            sortOrder: 4
+        }
     ]
 };
+

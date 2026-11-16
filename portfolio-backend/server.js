@@ -16,6 +16,7 @@ const educationRoutes = require('./routes/education');
 const exportRoutes = require('./routes/export');
 const authRoutes = require('./routes/auth');
 const communityRoutes = require('./routes/community');
+const certificateRoutes = require('./routes/certificates');
 
 const app = express();
 
@@ -99,6 +100,7 @@ app.use('/api/experience', experienceRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/education', educationRoutes);
 app.use('/api/community', communityRoutes);
+app.use('/api/certificates', certificateRoutes);
 app.use('/api', exportRoutes);
 
 // Secure Health check route (does not expose internal endpoints)

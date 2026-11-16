@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion';
-import { Home, Briefcase, Code, GraduationCap, Users } from 'lucide-react';
+import { Home, Briefcase, Code, GraduationCap, Users, Award } from 'lucide-react';
 
 const Navbar = () => {
     const navItems = [
         { icon: <Home className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Home', href: '#home' },
         { icon: <Code className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Skills', href: '#skills' },
         { icon: <Briefcase className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Work', href: '#projects' },
+        { icon: <Award className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Certificates', href: '#certificates' },
         { icon: <Users className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Responsibilities', href: '#community' },
         { icon: <GraduationCap className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Education', href: '#education' },
     ];
