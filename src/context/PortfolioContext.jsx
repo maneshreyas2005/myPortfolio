@@ -86,6 +86,7 @@ export const PortfolioProvider = ({ children }) => {
     <PortfolioContext.Provider
       value={{
         profile,
+        setProfile,
         skills,
         experience,
         projects,

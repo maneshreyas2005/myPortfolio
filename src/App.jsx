@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { PortfolioProvider } from './context/PortfolioContext';
 import Preloader from './components/Preloader';
 
@@ -13,18 +13,31 @@ const RouteFallback = () => (
   </div>
 );
 
+function AppContent() {
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
+
+  const routes = (
+    <Suspense fallback={<RouteFallback />}>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/project/:id" element={<ProjectDetails />} />
+        <Route path="/admin" element={<Admin />} />
+      </Routes>
+    </Suspense>
+  );
+
+  if (isAdmin) {
+    return routes;
+  }
+
+  return <Preloader>{routes}</Preloader>;
+}
+
 function App() {
   return (
     <PortfolioProvider>
-      <Preloader>
-        <Suspense fallback={<RouteFallback />}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/project/:id" element={<ProjectDetails />} />
-            <Route path="/admin" element={<Admin />} />
-          </Routes>
-        </Suspense>
-      </Preloader>
+      <AppContent />
     </PortfolioProvider>
   );
 }

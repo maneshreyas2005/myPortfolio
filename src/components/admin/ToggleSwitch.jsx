@@ -3,28 +3,34 @@ import { usePortfolio } from '../../context/PortfolioContext';
 import { updateProfileApi } from '../../dataFetch';
 
 export default function ToggleSwitch({ section, onToggle }) {
-  const { profile, adminToken } = usePortfolio();
+  const { profile, setProfile, adminToken } = usePortfolio();
   const [isSaving, setIsSaving] = useState(false);
 
-  const isVisible = profile.visibleSections?.includes(section.id) ?? true;
+  const currentSections = profile?.visibleSections || [];
+  const isVisible = currentSections.includes(section.id);
 
   const handleToggle = useCallback(async () => {
     if (!adminToken) return;
 
     setIsSaving(true);
     const newVisible = isVisible
-      ? profile.visibleSections.filter((s) => s !== section.id)
-      : [...profile.visibleSections, section.id];
+      ? currentSections.filter((s) => s !== section.id)
+      : [...currentSections, section.id];
+
+    // Optimistic UI update
+    setProfile?.((prev) => ({ ...prev, visibleSections: newVisible }));
 
     try {
       await updateProfileApi({ visibleSections: newVisible }, adminToken);
       onToggle?.(section.id, !isVisible);
     } catch (err) {
+      // Revert on error
+      setProfile?.((prev) => ({ ...prev, visibleSections: currentSections }));
       console.error(`Failed to ${isVisible ? 'hide' : 'show'} ${section.label}:`, err);
     } finally {
       setIsSaving(false);
     }
-  }, [profile, adminToken, setProfile, section, isVisible, onToggle]);
+  }, [currentSections, adminToken, setProfile, section, isVisible, onToggle]);
 
   return (
     <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors">
