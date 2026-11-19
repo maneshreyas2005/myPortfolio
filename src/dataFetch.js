@@ -1,4 +1,5 @@
 import { resumeData } from './data';
+import { SECTION_ORDER } from './config/sections';
 
 export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 export const SERVER_BASE = import.meta.env.VITE_SERVER_BASE_URL || 'http://localhost:5000';
@@ -22,7 +23,11 @@ export const fetchProfileData = async () => {
       linkedin: data.linkedin || resumeData.linkedin,
       location: data.location || resumeData.location,
       profileImage: data.profileImage || '/images/photo3.jpeg',
-      theme: data.theme || {}
+      theme: data.theme || {},
+      visibleSections: Array.isArray(data.visibleSections)
+        ? data.visibleSections
+        : [...SECTION_ORDER],
+      competencyMapConfig: data.competencyMapConfig || { layout: 'hierarchical', showEdgeLabels: false }
     };
   } catch (err) {
     console.warn('Profile fetch error, using local fallback:', err.message);
@@ -35,7 +40,9 @@ export const fetchProfileData = async () => {
       github: resumeData.github,
       linkedin: resumeData.linkedin,
       location: resumeData.location,
-      profileImage: '/images/photo3.jpeg'
+      profileImage: '/images/photo3.jpeg',
+      visibleSections: [...SECTION_ORDER],
+      competencyMapConfig: { layout: 'hierarchical', showEdgeLabels: false }
     };
   }
 };

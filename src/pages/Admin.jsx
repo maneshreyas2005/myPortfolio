@@ -770,6 +770,7 @@ export default function Admin() {
                           'success'
                         );
                       }}
+                      onError={(msg) => showToast(msg, 'error')}
                     />
                   ))}
                 </div>

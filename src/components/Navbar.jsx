@@ -1,15 +1,22 @@
 import { motion } from 'framer-motion';
 import { Home, Briefcase, Code, GraduationCap, Users, Award } from 'lucide-react';
+import { usePortfolio } from '../context/PortfolioContext';
+import { SECTION_ORDER } from '../config/sections';
 
 const Navbar = () => {
-    const navItems = [
-        { icon: <Home className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Home', href: '#home' },
-        { icon: <Code className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Skills', href: '#skills' },
-        { icon: <Briefcase className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Work', href: '#projects' },
-        { icon: <Award className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Certificates', href: '#certificates' },
-        { icon: <Users className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Responsibilities', href: '#community' },
-        { icon: <GraduationCap className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Education', href: '#education' },
+    const { profile } = usePortfolio();
+    const visibleSections = Array.isArray(profile?.visibleSections) ? profile.visibleSections : SECTION_ORDER;
+
+    const allNavItems = [
+        { id: 'home', icon: <Home className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Home', href: '#home' },
+        { id: 'skills', icon: <Code className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Skills', href: '#skills' },
+        { id: 'projects', icon: <Briefcase className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Work', href: '#projects' },
+        { id: 'certificates', icon: <Award className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Certificates', href: '#certificates' },
+        { id: 'community', icon: <Users className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Responsibilities', href: '#community' },
+        { id: 'education', icon: <GraduationCap className="w-[18px] h-[18px] sm:w-5 sm:h-5" />, label: 'Education', href: '#education' },
     ];
+
+    const navItems = allNavItems.filter((item) => item.id === 'home' || visibleSections.includes(item.id));
 
     return (
         <motion.nav

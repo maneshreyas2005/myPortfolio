@@ -33,7 +33,7 @@ function Home() {
     const cardRef = useRef(null);
     const [isMobile, setIsMobile] = useState(false);
     const { profile } = usePortfolio();
-    const visibleSections = profile?.visibleSections || SECTION_ORDER;
+    const visibleSections = Array.isArray(profile?.visibleSections) ? profile.visibleSections : SECTION_ORDER;
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 1280);
